@@ -1,35 +1,50 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import Services from "./services";
-import {Authentication} from "./scenes";
+import {AuthScene, MainScene, HomeScene, MidnightScene, ZebeScene} from "./scenes";
+import getBaseServices from "./services";
+import {combineReducers} from "redux";
+import * as constants from "./constants";
+import {Redirect, Route, Switch} from "react-router-dom";
 
-class Content extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo"/>
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        { this.props.loggedIn ? <button onClick={this.props.logout}>Logout</button> : <button onClick={this.props.login}>Login</button>}
-      </div>
-    )
-  }
-}
+const Authentication = AuthScene.getComponent(constants.actions.auth, constants.names.auth);
+const withAuth = AuthScene.getWrapper(constants.actions.auth, constants.names.auth);
+
+HomeScene.route = constants.paths.home;
+HomeScene.component = withAuth(HomeScene.getComponent(constants.actions.home, constants.names.home));
+MidnightScene.route = constants.paths.midnight;
+MidnightScene.component = withAuth(MidnightScene.getComponent(constants.actions.midnight, constants.names.midnight));
+ZebeScene.route = constants.paths.zebe;
+ZebeScene.component = withAuth(ZebeScene.getComponent(constants.actions.zebe, constants.names.zebe));
+
+const DisplaySceneList = [HomeScene, MidnightScene, ZebeScene];
+
+const MainContent = MainScene.getComponent(DisplaySceneList);
+
+const auth = AuthScene.getReducer(constants.actions.auth);
+const home = HomeScene.getReducer(constants.actions.home);
+const zebe = ZebeScene.getReducer(constants.actions.zebe);
+const BaseServices = getBaseServices(combineReducers({
+  [constants.names.auth] : auth,
+  [constants.names.home] : home,
+  [constants.names.zebe] : zebe
+}));
 
 class App extends Component {
   render() {
     return (
-      <Services>
-        <Authentication>
-          <Content />
+      <BaseServices>
+        <Authentication authPath={constants.paths.auth} homePath={constants.paths.base}
+                        component={MainContent}>
+          <Switch>
+            {DisplaySceneList.map((scene, idx) => (
+              <Route key={idx} path={constants.paths.base + scene.route} component={scene.component} />
+            ))}
+            <Route render={() => (
+              <Redirect to={constants.paths.base + constants.paths.home} />
+            )} />
+          </Switch>
         </Authentication>
-      </Services>
-    );
+      </BaseServices>
+    )
   }
 }
 

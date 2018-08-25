@@ -1,3 +1,0 @@
-export const AUTH_REDIRECT = "AUTH_REDIRECT";
-export const GET_TOKEN = "GET_TOKEN";
-export const FORCE_INVALIDATE = "INVALIDATE";

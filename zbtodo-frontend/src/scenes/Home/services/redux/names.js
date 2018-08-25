@@ -1,0 +1,1 @@
+export const CURRENT_USER = "GET_USER";

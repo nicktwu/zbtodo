@@ -43,8 +43,6 @@ router.get("/initiate", function(req, res) {
   const state_val = crypto.randomBytes(16).toString('hex');
   const nonce = crypto.randomBytes(16).toString('hex');
   hmac.update(state_val + nonce);
-  req.session.state = state_val;
-  req.session.nonce = nonce;
   res.send({
     state: state_val,
     nonce: nonce,

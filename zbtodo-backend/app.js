@@ -4,31 +4,10 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const logger = require('morgan');
-const crypto = require('crypto');
 const database = require('./db');
-const session_secret = crypto.randomBytes(256).toString('hex');
 
 // initialize the database
 database.initialize();
-
-// setup basic session stuff
-const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
-
-const sessionOptions = {
-  name: "zbtodo-session",
-  secret: session_secret,
-  resave: false,
-  saveUninitialized: false,
-  httpOnly: false
-};
-
-if (process.env.HEROKU) {
-  // Production mode: should not save session information in local memory, connect to a redis store
-  sessionOptions.store = new RedisStore({
-    url: process.env.REDIS_URL
-  });
-}
 
 console.log("Starting application...");
 // start up the app
@@ -40,9 +19,6 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-
-// setup sessions
-app.use(session(sessionOptions));
 
 if (process.env.HEROKU) {
   // PROD: minimal logging
@@ -70,7 +46,7 @@ app.options("/*", function(req, res) {
 app.use(function(req, res, next) {
   if (process.env.HEROKU) {
     // IN PROD
-    res.header('Access-Control-Allow-Origin', '*.mit.edu');
+    res.header('Access-Control-Allow-Origin', 'https://zbt.mit.edu');
   } else {
     // IN DEV
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000' /* or wherever your frontend is */)

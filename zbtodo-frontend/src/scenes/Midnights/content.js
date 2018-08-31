@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {
-  Grid, Paper, Divider, Typography, IconButton,
+  Grid, Paper, Divider, Typography, IconButton, TextField,
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
   withStyles, withWidth
 } from '@material-ui/core';
@@ -49,6 +49,9 @@ const styles = (theme) => ({
   },
   withOverflow: {
     overflowX: "auto"
+  },
+  centerText: {
+    textAlign: "center"
   }
 });
 
@@ -67,16 +70,39 @@ class MidnightContent extends Component {
       unreviewedIdx: 0,
       editAccount: false,
       accountIdx: 0,
+      currentDate: (new Date()).toISOString().substring(0,10),
+      differentWeek: false
     };
     this.saveSetting = this.saveSetting.bind(this);
     this.authHandle = this.authHandle.bind(this);
     this.removeMidnight = this.removeMidnight.bind(this);
+    this.handleDayChange = this.handleDayChange.bind(this);
+  }
+
+  handleDayChange(evt) {
+    let newDate = evt.target.value;
+    let lastDate = moment.parseZone(this.state.currentDate);
+    let now = moment();
+    let changeWeek = (lastDate.isoWeekYear() !== moment.parseZone(newDate).isoWeekYear()) || (lastDate.isoWeek() !== moment.parseZone(newDate).isoWeek());
+    this.setState({loading: true});
+    this.authHandle(this.props.changeDay(this.props.token, {date: moment.parseZone(newDate).toISOString()})).then((content) => {
+      if (content) {
+        this.setState({
+          loading:false,
+          currentDate: newDate,
+          differentWeek: (now.isoWeekYear() !== moment.parseZone(newDate).isoWeekYear()) || (now.isoWeek() !== moment.parseZone(newDate).isoWeek()),
+          showing: changeWeek ? moment.parseZone(newDate).day() : this.state.showing
+        });
+      }
+    })
   }
 
   removeMidnight(id) {
     return () => {
       this.setState({midnightDetail: false, loading: true});
-      return this.authHandle(this.props.deleteMidnight(this.props.token, id)).then((contents) => {
+      return this.authHandle(
+        this.props.deleteMidnight(this.props.token, id, moment.parseZone(this.state.currentDate).toISOString())
+      ).then((contents) => {
         if (contents) {
           this.setState({loading: false})
         }
@@ -97,7 +123,7 @@ class MidnightContent extends Component {
 
   saveSetting(saveFunc) {
     return (idArray) => {
-      return this.authHandle(saveFunc(this.props.token, idArray))
+      return this.authHandle(saveFunc(this.props.token, idArray, moment.parseZone(this.state.currentDate).toISOString()))
     }
   }
 
@@ -202,12 +228,17 @@ class MidnightContent extends Component {
                              submit={this.saveSetting(this.props.editAccount)}/>
                 : null
             }
-            <Grid container className={classes.contentContainer} direction={"column"}>
+            <Grid container className={classes.contentContainer} justify={"center"} direction={"column"}>
+              <Grid item xs className={classes.centerText}>
+                <TextField value={this.state.currentDate}
+                           type={"date"} label={"View the week of"}
+                           onChange={this.handleDayChange}/>
+              </Grid>
               <Grid item className={classes.gridItem} xs>
                 <Paper className={mdUp ? classes.paper : null}>
                   <Grid container direction={mdUp ? "column" : "row"}>
                     <MidnightDayToolbar mobile={!mdUp} tiny={width==="xs"} active={this.state.showing}
-                                        today={(new Date()).getDay() % 7}
+                                        today={(new Date()).getDay() % 7} differentWeek={this.state.differentWeek}
                                         midnightInfo={midnights.map((dayMidnights) => {
                                           let resObj = {};
                                           resObj.dayNumber = moment.parseZone(dayMidnights.date).date();
@@ -297,14 +328,15 @@ const mapDispatchToProps = (PREFIX) => ((dispatch) => ({
   addType: (token, typeObj) => dispatch(Actions.createTypeAction(PREFIX)(token, typeObj)),
   fetchAll: (token, admin) => dispatch(Actions.createFetchMidnightData(PREFIX)(token, admin)),
   editType: (token, typeObj) => dispatch(Actions.createTypeAction(PREFIX)(token, typeObj, {edit: true})),
-  deleteTypes: (token, typeIds) => dispatch(Actions.createTypeAction(PREFIX)(token, {deleted: typeIds}, {remove: true})),
-  addMidnight: (token, midnightObj) => dispatch(Actions.createMidnightAction(PREFIX)(token, midnightObj)),
-  editMidnight: (token, midnightObj) => dispatch(Actions.createMidnightAction(PREFIX)(token, midnightObj, {edit: true})),
-  deleteMidnight: (token, id) => dispatch(Actions.createMidnightAction(PREFIX)(token, {deleted: [id] }, {remove: true})),
+  deleteTypes: (token, typeIds, weekDate) => dispatch(Actions.createTypeAction(PREFIX)(token, {deleted: typeIds, weekDate}, {remove: true})),
+  addMidnight: (token, midnightObj, weekDate) => dispatch(Actions.createMidnightAction(PREFIX)(token, { ...midnightObj, weekDate })),
+  editMidnight: (token, midnightObj, weekDate) => dispatch(Actions.createMidnightAction(PREFIX)(token, {...midnightObj, weekDate}, {edit: true})),
+  deleteMidnight: (token, id, weekDate) => dispatch(Actions.createMidnightAction(PREFIX)(token, {deleted: [id], weekDate}, {remove: true})),
   addAccounts: (token, userIds) => dispatch(Actions.createAccountAction(PREFIX)(token, {zebes: userIds})),
   editAccount: (token, payload) => dispatch(Actions.createAccountAction(PREFIX)(token, payload, {edit: true})),
-  deleteAccounts: (token, ids) => dispatch(Actions.createAccountAction(PREFIX)(token, {deleted: ids}, {remove: true})),
-  awardMidnight: (token, payload) => dispatch(Actions.createMidnightAward(PREFIX)(token, payload))
+  deleteAccounts: (token, ids, weekDate) => dispatch(Actions.createAccountAction(PREFIX)(token, {deleted: ids, weekDate}, {remove: true})),
+  awardMidnight: (token, payload, weekDate) => dispatch(Actions.createMidnightAward(PREFIX)(token, { ...payload, weekDate})),
+  changeDay: (token, date) => dispatch(Actions.createChangeWeek(PREFIX)(token, date))
 }));
 
 const reduxProps = {
@@ -322,7 +354,8 @@ const reduxProps = {
   addAccounts: PropTypes.func.isRequired,
   editAccount: PropTypes.func.isRequired,
   deleteAccounts: PropTypes.func.isRequired,
-  awardMidnight: PropTypes.func.isRequired
+  awardMidnight: PropTypes.func.isRequired,
+  changeDay: PropTypes.func.isRequired
 };
 
 const authProps = {

@@ -17,6 +17,7 @@ const ADD_MIDNIGHT = BACKEND_BASE + "/midnight/create";
 const EDIT_MIDNIGHT = BACKEND_BASE + "/midnight/update/";
 const DELETE_MIDNIGHT = BACKEND_BASE + "/midnight/delete";
 const AWARD_MIDNIGHT = BACKEND_BASE + "/midnight/award/";
+const GET_WEEK = BACKEND_BASE + "/midnight/week/";
 
 export const createTypeAction = (PREFIX) => ((token, payload, options) => ((dispatch)=> {
   let editing = options && options.edit;
@@ -140,6 +141,26 @@ export const createMidnightAward = (PREFIX) => ((token, payload) => ((dispatch) 
     dispatch({type: PREFIX+MIDNIGHT_ASSIGNMENTS, midnights: contents.midnights});
     dispatch({type: PREFIX+UNREVIEWED, unreviewed: contents.unreviewed});
     dispatch({type: PREFIX+MIDNIGHT_ACCOUNTS, accounts: contents.accounts});
+    return contents
+  })
+}));
+
+export const createChangeWeek = (PREFIX) => ((token, payload) => ((dispatch) => {
+  return fetch(GET_WEEK, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  }).then(res => {
+    if (res.status >= 400 && res.status <= 600) {
+      throw new Error("Data update failure")
+    }
+    return res.json()
+  }).then(contents => {
+    dispatch({type: PREFIX+MIDNIGHT_ASSIGNMENTS, midnights: contents.midnights});
     return contents
   })
 }));

@@ -31,7 +31,7 @@ const buttonStyles = (theme) => ({
   }
 });
 
-const MidnightToolbarCell = ({ active, today, handleClick, dayNumber, numMidnights, classes}) => {
+const MidnightToolbarCell = ({ active, today, handleClick, dayNumber, numMidnights, classes, differentWeek}) => {
   let message = "";
   if (numMidnights) {
     let onlyOne = numMidnights === 1;
@@ -46,10 +46,13 @@ const MidnightToolbarCell = ({ active, today, handleClick, dayNumber, numMidnigh
   } else if (today === 0) {
     message = "Today"
   }
+  if (differentWeek) {
+    message = "";
+  }
   return (
     <Grid item xs className={classes.container}>
     <Tooltip title={message}>
-      <IconButton className={today === 0 ? classes.today : active ? classes.active : ""} onClick={handleClick}>
+      <IconButton className={today === 0 && !differentWeek ? classes.today : active ? classes.active : ""} onClick={handleClick}>
         { numMidnights > 0 ? <Badge badgeContent={numMidnights} color={"error"}>{dayNumber}</Badge> : dayNumber}
       </IconButton>
     </Tooltip>
@@ -62,6 +65,7 @@ MidnightToolbarCell.propTypes = {
   classes: PropTypes.object.isRequired,
   active: PropTypes.bool.isRequired,
   numMidnights: PropTypes.number.isRequired,
+  differentWeek: PropTypes.bool,
   today: PropTypes.number.isRequired,
   handleClick: PropTypes.func.isRequired
 };
@@ -118,7 +122,7 @@ class MidnightToolbar extends Component {
                 return (
                   <Grid item xs key={idx} className={this.props.classes.navContainer}>
                     <Grid container direction={"row"} alignItems={"center"} justify={"center"}>
-                      <StyledToolbarCell active={idx === this.props.active}
+                      <StyledToolbarCell active={idx === this.props.active} differentWeek={this.props.differentWeek}
                                          today={this.props.today - idx} handleClick={this.props.handleClick(idx)}
                                          dayNumber={info.dayNumber} numMidnights={info.numMidnights}/>
                     </Grid>
@@ -140,7 +144,7 @@ class MidnightToolbar extends Component {
                         <Typography variant="subheading"
                                     className={this.props.classes.textLabel}>{DAYNAMES[idx]}</Typography>
                       </Grid>
-                      <StyledToolbarCell active={idx === this.props.active}
+                      <StyledToolbarCell active={idx === this.props.active} differentWeek={this.props.differentWeek}
                                          today={this.props.today - idx} handleClick={this.props.handleClick(idx)}
                                          dayNumber={info.dayNumber} numMidnights={info.numMidnights}/>
                     </Grid>
@@ -164,7 +168,7 @@ class MidnightToolbar extends Component {
           <Grid container>
             { this.props.midnightInfo.map((info, idx) => {
               return (
-                <StyledToolbarCell key={idx} active={idx === this.props.active}
+                <StyledToolbarCell key={idx} active={idx === this.props.active} differentWeek={this.props.differentWeek}
                                    today={this.props.today - idx} handleClick={this.props.handleClick(idx)}
                                    dayNumber={info.dayNumber} numMidnights={info.numMidnights}/>
               )
@@ -178,6 +182,7 @@ class MidnightToolbar extends Component {
 
 MidnightToolbar.propTypes = {
   tiny: PropTypes.bool,
+  differentWeek: PropTypes.bool,
   today: PropTypes.number.isRequired,
   active: PropTypes.number.isRequired,
   mobile: PropTypes.bool.isRequired,

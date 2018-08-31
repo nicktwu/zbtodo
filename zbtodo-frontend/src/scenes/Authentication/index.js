@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {Actions} from './services/redux';
 import {Route, Switch, Redirect, withRouter} from 'react-router-dom';
 import {FinishAuthorization, Login} from "./components";
-import queryString from "query-string";
+import queryString from "querystring";
 import {loginPath, logoutPath, landingPath} from "./paths";
 import {getAuth} from "./services/redux";
 
@@ -48,7 +48,7 @@ class Authentication extends Component {
                                  finishLogin={(code, state) => (this.props.getToken(
                                    code, state, this.props.auth.nonce, this.props.auth.mac
                                  ))} loginPath={this.props.authPath + loginPath}
-                                 queryParams={queryString.parse(location.search)} />
+                                 queryParams={queryString.parse(location.search.substring(1))} />
           )
         }/>
         <Route path={this.props.authPath + logoutPath} render={() => {

@@ -4,37 +4,69 @@
  * Module dependencies.
  */
 
-const app = require('../app')
-const debug = require('debug')('zbtodo-backend:server')
-const http = require('http')
+const app = require('../app');
+const debug = require('debug')('zbtodo-backend:server');
+const http = require('http');
+const cluster = require('cluster');
 
 /**
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '5000')
-app.set('port', port)
+const port = normalizePort(process.env.PORT || '5000');
+app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Set up cluster for multithreading
  */
+const WORKERS = process.env.WEB_CONCURRENCY || 1;
 
-const server = http.createServer(app)
 
 /**
- * Listen on provided port, on all network interfaces.
+ * Create HTTP server(s).
  */
 
-server.listen(port)
-server.on('error', onError)
-server.on('listening', onListening)
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+  for (let i=0; i < WORKERS; i++) {
+    cluster.fork();
+  }
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+  });
+} else {
+  const server = http.createServer(app);
+
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+
+  /**
+   * Event listener for HTTP server "listening" event.
+   */
+
+  function onListening() {
+    console.log(`Worker ${process.pid} started`);
+    const addr = server.address();
+    const bind = typeof addr === 'string'
+      ? 'pipe ' + addr
+      : 'port ' + addr.port;
+    debug('Listening on ' + bind)
+  }
+}
+
+
 
 /**
  * Normalize a port into a number, string, or false.
  */
 
 function normalizePort(val) {
-  const port = parseInt(val, 10)
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -60,31 +92,21 @@ function onError(error) {
 
   const bind = typeof port === 'string'
     ? 'Pipe ' + port
-    : 'Port ' + port
+    : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges')
-      process.exit(1)
-      break
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use')
-      process.exit(1)
-      break
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
     default:
       throw error
   }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
 
-function onListening() {
-  const addr = server.address()
-  const bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port
-  debug('Listening on ' + bind)
-}

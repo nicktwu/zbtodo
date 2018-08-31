@@ -2,15 +2,16 @@ import {AUTH_ERROR, LOGIN, SAVE_TOKEN, CLEAR_AUTH_MESSAGE, LOGOUT, LOGOUT_ERROR}
 
 let BACKEND_AUTH = "https://zbtodo-backend.herokuapp.com/auth";
 
-if (process.env.NODE_ENV === "development") {
-  BACKEND_AUTH = "http://localhost:5000/auth";
-}
 const BACKEND_INITIATE = BACKEND_AUTH + "/initiate";
 const BACKEND_LOGIN = BACKEND_AUTH + "/login";
 const AUTH_ENDPOINT = "https://oidc.mit.edu/authorize";
 const LOGOUT_ENDPOINT = "https://oidc.mit.edu/logout";
 const CLIENT_ID = "986eded7-87a0-4e09-986b-98553ffc0eef";
-const LOGIN_REDIRECT = "http://localhost:3000/todo/auth/landing"; // for debug
+let LOGIN_REDIRECT = "https://zbt.mit.edu/todo/auth/landing";
+if (process.env.NODE_ENV === "development") {
+  BACKEND_AUTH = "http://localhost:5000/auth";
+  LOGIN_REDIRECT = "http://localhost:3000/todo/auth/landing"; // for debug
+}
 
 const getLogin = (PREFIX) => (() => {
   return (dispatch) => {

@@ -31,7 +31,7 @@ if (process.env.HEROKU) {
 app.options("/*", function(req, res) {
   if (process.env.HEROKU) {
     // IN PROD
-    res.header('Access-Control-Allow-Origin', '*.mit.edu');
+    res.header('Access-Control-Allow-Origin', 'https://zbt.mit.edu');
   } else {
     // IN DEV
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000' /* or wherever your frontend is */)

@@ -3,6 +3,7 @@ const router = express.Router();
 const emailer = require('../emailer');
 const Semester = require('../models/semester');
 const Midnights = require('../models/midnights');
+const moment = require('moment');
 
 /**
  * GET /all/user
@@ -123,7 +124,7 @@ router.post('/types/delete', midnightPermissions, function(req, res, next) {
       return Midnights.MidnightType.getCurrent()
     }).then(docs => {
       resObj.types = docs;
-      return Midnights.Midnight.getWeek()
+      return Midnights.Midnight.getWeek(new Date(req.body.weekDate))
     }).then(midnights => {
       resObj.midnights = midnights;
       res.send(resObj);
@@ -145,8 +146,13 @@ router.post('/midnight/create', midnightPermissions, function(req, res, next) {
   ) {
     console.log(req.body.date);
     let resObj = {token: req.refreshed_token};
-    Midnights.Midnight.create(req.body).then(() => {
-      return Midnights.Midnight.getWeek()
+    Midnights.Midnight.create({
+      date: req.body.date,
+      task: req.body.task,
+      account: req.body.account,
+      potential: req.body.potential
+    }).then(() => {
+      return Midnights.Midnight.getWeek(new Date(req.body.weekDate))
     }).then(midnights => {
       resObj.midnights = midnights;
       return Midnights.Midnight.getUnreviewed()
@@ -171,10 +177,10 @@ router.put('/midnight/update/:id', midnightPermissions, function(req, res, next)
   ) {
     Midnights.Midnight.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: { date: req.body.date, task: req.body.task, account: req.body.account, potential: req.body.potential } },
       {runValidators: true, new: true, lean: false}
     ).exec().then(() => {
-      return Midnights.Midnight.getWeek()
+      return Midnights.Midnight.getWeek(new Date(req.body.weekDate))
     }).then(midnights => {
       res.json({midnights: midnights, token: req.refreshed_token})
     }).catch(next);
@@ -188,7 +194,7 @@ router.post('/midnight/delete', midnightPermissions, function(req, res, next) {
   if (req.body && req.body.deleted && req.body.deleted.length > 0) {
     let resObj = {token: req.refreshed_token};
     Midnights.Midnight.deleteMany({_id: {$in: req.body.deleted}}).exec().then(() => {
-      return Midnights.Midnight.getWeek()
+      return Midnights.Midnight.getWeek(new Date(req.body.weekDate))
     }).then(docs => {
       resObj.midnights = docs;
       res.send(resObj);
@@ -212,7 +218,7 @@ router.post('/midnight/award/:id', midnightPermissions, function(req, res, next)
        $inc: {balance: newMidnight.awarded}
       }, {runValidators: true, new: true, lean: false})
     }).then(() => {
-      return Midnights.Midnight.getWeek()
+      return Midnights.Midnight.getWeek(new Date(req.body.weekDate))
     }).then(midnights => {
       resObj.midnights = midnights;
       return Midnights.Midnight.getUnreviewed();
@@ -222,6 +228,18 @@ router.post('/midnight/award/:id', midnightPermissions, function(req, res, next)
     }).then(accounts => {
       resObj.accounts = accounts;
       res.json(resObj)
+    }).catch(next);
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+router.post('/midnight/week', function(req, res, next) {
+  if (req.body && req.body.date) {
+    let resObj = {token: req.refreshed_token};
+    Midnights.Midnight.getWeek(new Date(req.body.date)).then(midnights => {
+      resObj.midnights=midnights;
+      res.json(resObj);
     }).catch(next);
   } else {
     res.sendStatus(400);
@@ -284,7 +302,7 @@ router.post('/accounts/delete', midnightPermissions, function(req, res, next) {
       return Midnights.MidnightAccount.getCurrent()
     }).then(docs => {
       resObj.accounts = docs;
-      return Midnights.Midnight.getWeek();
+      return Midnights.Midnight.getWeek(new Date(req.body.weekDate));
     }).then(midnights => {
       resObj.midnights = midnights;
       res.send(resObj);

@@ -80,8 +80,6 @@ app.use(function(req, res, next) {
 });
 
 // routes
-const zebes = require('./routes/zebes');
-const homes = require('./routes/home');
 const auth = require('./auth');
 
 app.use('/auth', auth.routes);
@@ -97,8 +95,15 @@ app.use(auth.requireAuthentication);
 app.use(auth.withRefresh);
 
 // api routes
+const zebes = require('./routes/zebes');
+const homes = require('./routes/home');
+const midnights = require('./routes/midnights');
+const semesters = require('./routes/semester');
+
 app.use('/api/home', homes);
 app.use('/api/zebes', zebes);
+app.use("/api/midnights", midnights);
+app.use("/api/semester", semesters);
 
 
 module.exports = app;

@@ -23,6 +23,8 @@ const styles = (theme) => ({
   drawerPaper: {
     position: 'relative',
     width: drawerWidth,
+    minHeight: "100vh",
+    height: "100%"
   },
   content: {
     flexGrow: 1,
@@ -133,7 +135,7 @@ class NavBar extends Component {
           <Grid item className={this.props.classes.noflex}>
             <Toolbar/>
           </Grid>
-          <Grid item className={this.props.classes.flexContent}>
+          <Grid item xs>
             {this.props.children}
           </Grid>
         </Grid>

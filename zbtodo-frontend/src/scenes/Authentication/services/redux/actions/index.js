@@ -1,6 +1,10 @@
 import {AUTH_ERROR, LOGIN, SAVE_TOKEN, CLEAR_AUTH_MESSAGE, LOGOUT, LOGOUT_ERROR} from "../names";
 
-const BACKEND_AUTH = "http://localhost:5000/auth";
+let BACKEND_AUTH = "https://zbtodo-backend.herokuapp.com/auth";
+
+if (process.env.NODE_ENV === "development") {
+  BACKEND_AUTH = "http://localhost:5000/auth";
+}
 const BACKEND_INITIATE = BACKEND_AUTH + "/initiate";
 const BACKEND_LOGIN = BACKEND_AUTH + "/login";
 const AUTH_ENDPOINT = "https://oidc.mit.edu/authorize";

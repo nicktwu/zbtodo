@@ -16,7 +16,8 @@ const paths = {
   auth: "/auth",
   base: "/zbt",
   home: "/home",
-  zebe: "/zebe"
+  zebe: "/zebe",
+  midnight: "/midnight"
 };
 
 export { actions, paths, names }

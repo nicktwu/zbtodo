@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const models = require('./models');
+const Zebe = require('./models/zebe');
+const Semester = require('./models/semester');
+const { Midnight, MidnightType, MidnightAccount, MidnightPrefs } = require('./models/midnights');
 
 function initialize() {
   if (process.env.HEROKU) {
@@ -15,12 +17,12 @@ function initialize() {
       console.log("Connected to DB!")
   });
   mongoose.set("useFindAndModify", false);
-  models.Zebe.init();
-  models.Semester.init();
-  models.Midnight.init();
-  models.MidnightType.init();
-  models.MidnightAccount.init();
-  models.MidnightPrefs.init();
+  Zebe.init();
+  Semester.init();
+  Midnight.init();
+  MidnightType.init();
+  MidnightAccount.init();
+  MidnightPrefs.init();
 }
 
 module.exports = {

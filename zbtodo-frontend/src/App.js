@@ -17,15 +17,19 @@ ZebeScene.component = withAuth(ZebeScene.getComponent(constants.actions.zebe, co
 
 const DisplaySceneList = [HomeScene, MidnightScene, ZebeScene];
 
+// setup the main wrapper
 const MainContent = MainScene.getComponent(DisplaySceneList);
 
+// unify all the reducers into one, and set the names appropriately
 const auth = AuthScene.getReducer(constants.actions.auth);
 const home = HomeScene.getReducer(constants.actions.home);
 const zebe = ZebeScene.getReducer(constants.actions.zebe);
+const midnight = MidnightScene.getReducer(constants.actions.midnight);
 const BaseServices = getBaseServices(combineReducers({
   [constants.names.auth] : auth,
   [constants.names.home] : home,
-  [constants.names.zebe] : zebe
+  [constants.names.zebe] : zebe,
+  [constants.names.midnight] : midnight
 }));
 
 class App extends Component {

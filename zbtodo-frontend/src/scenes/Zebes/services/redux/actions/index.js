@@ -1,13 +1,17 @@
 import {SAVE_CURRENT_LIST, SAVE_INACTIVE_LIST, SAVE_POTENTIAL_LIST} from "../names";
 
-const BACKEND_BASE = "http://localhost:5000/api/zebes";
+let BACKEND_BASE = "https://zbtodo-backend.herokuapp.com/api/zebes";
+
+if (process.env.NODE_ENV === "development") {
+  BACKEND_BASE = "http://localhost:5000/api/zebes";
+}
 const CURRENT_ZEBES = BACKEND_BASE + "/current";
 const UPDATE_CURRENT = BACKEND_BASE + "/update_current";
 const ADMIN = BACKEND_BASE + "/admin";
 const VALIDATE = BACKEND_BASE + "/validate";
 const DEACTIVATE = BACKEND_BASE + "/deactivate";
 const REACTIVATE = BACKEND_BASE + "/reactivate";
-const DELETE = BACKEND_BASE + "/delete";
+const DELETE = BACKEND_BASE + "/delete_many";
 const PERMISSIONS = BACKEND_BASE + "/permissions";
 
 export const createGetCurrentZebes = (PREFIX) => ((token) => ((dispatch) => {
@@ -31,7 +35,7 @@ export const createGetCurrentZebes = (PREFIX) => ((token) => ((dispatch) => {
 // at heart, it's doing my service works
 export const editUserInfo = (token, updateObj) => {
   return fetch(UPDATE_CURRENT, {
-    method: 'PUT',
+    method: 'POST',
     mode: "cors",
     headers: {
       "Authorization": "Bearer " + token,
@@ -48,7 +52,7 @@ export const editUserInfo = (token, updateObj) => {
 
 export const editZebePermissions = (PREFIX) => ((token, updateObj) => ((dispatch) => {
   return fetch(PERMISSIONS, {
-    method: "PUT",
+    method: "POST",
     mode: "cors",
     headers: {
       "Authorization": "Bearer " + token,

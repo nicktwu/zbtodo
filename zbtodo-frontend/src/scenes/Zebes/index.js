@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {GenericNav} from "../../components";
 import getContent from "./content";
 import {getZebes} from "./services/redux";
+import {connect} from "react-redux";
 
 class SceneNav extends Component {
   render() {
@@ -13,6 +14,11 @@ class SceneNav extends Component {
   }
 }
 
+const getWrapper = (PREFIX, NAME) => ((Component) => connect(
+  (state) => ({ currentZebes: state[NAME].currentZebes }),
+  () => ({})
+)(Component));
+
 SceneNav.propTypes = {
   active: PropTypes.bool
 };
@@ -20,7 +26,8 @@ SceneNav.propTypes = {
 const Scene = {
   getComponent: getContent,
   nav: SceneNav,
-  getReducer: getZebes
+  getReducer: getZebes,
+  getWrapper: getWrapper
 };
 
 export default Scene;

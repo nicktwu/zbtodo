@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+const db = require('../db');
+const reminder = require('../reminders');
+
+db.initialize();
+reminder.remindMidnights().then(() => {
+  process.exit();
+});

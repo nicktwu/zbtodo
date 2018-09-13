@@ -3,14 +3,16 @@
 const FROM_EMAIL = "zbt-no-reply@mit.edu";
 
 const sg = require('@sendgrid/mail');
-sg.setApiKey(process.env.SENDGRID_API_KEY);
+if (process.env.HEROKU) {
+  sg.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 send = function(to, subject, body) {
   let msg = {
     to: to,
     from: FROM_EMAIL,
     subject: subject,
-    text: body
+    html: body
   };
 
   if (process.env.HEROKU) {
@@ -23,7 +25,15 @@ send = function(to, subject, body) {
   }
 };
 
+const notifyMidnightsGenerated = () => {
+  return send(
+    "zbt-residents@mit.edu",
+    "[ZBTodo] Midnights Assigned",
+    "Midnights for this week have been assigned. View them in <a href='https://zbt.mit.edu/todo'>ZBTodo</a>.")
+};
+
 
 module.exports = {
-  send: send
+  send,
+  notifyMidnightsGenerated
 };

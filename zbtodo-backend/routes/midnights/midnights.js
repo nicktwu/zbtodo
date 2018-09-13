@@ -5,6 +5,7 @@ const moment = require('moment');
 const mongoose = require('mongoose');
 const computation = require("../../computation/midnights_graph_computation");
 const permissions = require('./permissions');
+const emailer = require("../../emailer");
 
 /**
  * POST week midnights with date in body
@@ -64,7 +65,7 @@ router.post('/generate', function(req, res, next) {
     }))
   }).then(tasks => {
     return Midnights.Midnight.create(tasks)
-  }).then(()=>{
+  }).then(emailer.notifyMidnightsGenerated).then(()=>{
     return Midnights.Midnight.getWeek(req.body ? req.body.date : null)
   }).then((midnights)=>{
     res.json({ midnights, token: req.refreshed_token})

@@ -6,8 +6,8 @@ let SEMESTER_BASE = "https://zbtodo-backend.herokuapp.com/api/semester";
 if (process.env.NODE_ENV === "development") {
   BACKEND_BASE = "http://localhost:5000/api/home";
   SEMESTER_BASE = "http://localhost:5000/api/semester";
-
 }
+
 const GET_HOME = BACKEND_BASE + "/all";
 const CHECK_OK = SEMESTER_BASE + "/ready_to_advance";
 const ADVANCE_SEMESTER = SEMESTER_BASE + "/advance";

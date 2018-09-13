@@ -10,18 +10,18 @@ class MidnightReviewForm extends Component {
     super(props);
     this.state = {
       saved: false,
-      saving: false,
-      points: props.midnight.reviewed ? props.midnight.awarded : props.midnight.potential,
-      comment: props.midnight.reviewed ? props.midnight.feedback : ""
+      saving: false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.points = React.createRef();
+    this.comment = React.createRef();
   }
 
   handleSubmit(event) {
     event.preventDefault();
     let typeObj = {
-      feedback: this.state.comment,
-      awarded: this.state.points,
+      feedback: this.comment.current.value,
+      awarded: this.points.current.value,
       reviewed: true,
       _id: this.props.midnight._id
     };
@@ -50,15 +50,16 @@ class MidnightReviewForm extends Component {
         <React.Fragment>
           <Typography variant="subheading">{this.props.midnight.date.slice(0,10)} {this.props.midnight.task.name}: {this.props.midnight.account.zebe.name} ({this.props.midnight.account.zebe.kerberos})</Typography>
           { this.props.midnight.note ? <Typography gutterBottom variant="body1">Note: { this.props.midnight.note }</Typography>: null }
-          <FormControl fullWidth margin="dense" error={this.state.numberError}>
+          <FormControl fullWidth margin="dense">
             <InputLabel>Points Awarded</InputLabel>
-            <Input value={this.state.points} onChange={(evt) => this.setState({points: evt.target.value})} type="number"
-                   required/>
+            <Input inputRef={this.points} type="number" required
+                   defaultValue={this.props.midnight.reviewed ? this.props.midnight.awarded : this.props.midnight.potential}/>
             <FormHelperText>Can be negative (for punts)</FormHelperText>
           </FormControl>
           <FormControl fullWidth margin="dense">
             <InputLabel>Comments</InputLabel>
-            <Input multiline value={this.state.comment} onChange={evt=>this.setState({comment:evt.target.value})}/>
+            <Input multiline inputRef={this.comment}
+                   defaultValue={this.props.midnight.reviewed ? this.props.midnight.feedback : ""}/>
           </FormControl>
         </React.Fragment>
       </DialogForm>

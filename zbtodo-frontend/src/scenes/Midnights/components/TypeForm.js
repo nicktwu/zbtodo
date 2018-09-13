@@ -1,9 +1,19 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {
-  FormControl, InputLabel, Input, FormHelperText
+  FormControl, InputLabel, Input, FormHelperText, Divider
 } from '@material-ui/core';
 import { DialogForm } from "../../../components";
+
+const DAYS_OF_WEEK= [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+];
 
 class TypeForm extends Component {
   constructor(props) {
@@ -17,6 +27,7 @@ class TypeForm extends Component {
     this.name = React.createRef();
     this.pointValue = React.createRef();
     this.description = React.createRef();
+    this.defaultDays = DAYS_OF_WEEK.map(() => React.createRef());
   }
 
   handleSubmit(event) {
@@ -24,7 +35,8 @@ class TypeForm extends Component {
     let typeObj = {
       name: this.name.current.value,
       value: this.pointValue.current.value,
-      description: this.description.current.value
+      description: this.description.current.value,
+      defaultDays: this.defaultDays.map((ref) => (ref.current.value))
     };
     if (!(typeObj.value > 0)) {
       this.setState({numberError: true})
@@ -37,6 +49,9 @@ class TypeForm extends Component {
             this.name.current.value = "";
             this.pointValue.current.value = 0;
             this.description.current.value = "";
+            for (let i = 0; i < DAYS_OF_WEEK.length; i++) {
+              this.defaultDays[i].current.value = 0;
+            }
           }
           this.timeout = setTimeout(() => this.setState({saved: false}), 2000)
         }
@@ -73,6 +88,14 @@ class TypeForm extends Component {
                    defaultValue={this.props.defaultType ? this.props.defaultType.description : ""}
                    placeholder="Enter description here..."/>
           </FormControl>
+          <Divider />
+            { DAYS_OF_WEEK.map((day, idx) => (
+              <FormControl key={idx} margin="dense" style={{width: "70px"}}>
+                <InputLabel>{day}</InputLabel>
+                <Input inputRef={this.defaultDays[idx]} required
+                       defaultValue={this.props.defaultType ? this.props.defaultType.defaultDays[idx] : 0}/>
+              </FormControl>
+            ))}
         </React.Fragment>
       </DialogForm>
     )

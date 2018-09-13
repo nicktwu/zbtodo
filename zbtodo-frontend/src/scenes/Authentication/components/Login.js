@@ -60,7 +60,10 @@ class Login extends Component {
     }
     return (
       <div className={this.props.classes.loginContainer}>
-        <Dialog open={!!this.props.errMessage} onClose={this.props.clearMessage}>
+        <Dialog open={!!this.props.errMessage} onClose={() => {
+          this.setState({loading: false});
+          this.props.clearMessage();
+        }}>
           <DialogTitle>
             Error
           </DialogTitle>
@@ -70,7 +73,10 @@ class Login extends Component {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.props.clearMessage} color="secondary">Close</Button>
+            <Button onClick={() => {
+              this.setState({loading: false});
+              this.props.clearMessage();
+            }} color="secondary">Close</Button>
           </DialogActions>
         </Dialog>
         <Paper className={this.props.classes.loginPaper}>
@@ -79,8 +85,8 @@ class Login extends Component {
           </Avatar>
           <Typography variant="headline" gutterBottom>You are not signed in.</Typography>
           <Typography gutterBottom paragraph>Click below to login with MIT credentials.</Typography>
-          <Button color="primary" variant="raised" fullWidth disabled={this.props.loading}
-                  onClick={this.initiateLogin}>Login</Button>
+          <Button color="primary" variant="raised" fullWidth disabled={this.state.loading}
+                  onClick={this.initiateLogin}>{ this.state.loading ? "Loading..." : "Login"}</Button>
         </Paper>
       </div>
     )

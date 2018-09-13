@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Semester = require("./semester");
 const Zebe = require('./zebe');
+const moment = require('moment');
 
 const midnightTypeSchema = new Schema({
   semester: {type: Schema.Types.ObjectId, ref: "Semester"},
   name: String,
   value: Number,
+  defaultDays: [Number],
   description: String
 });
 
@@ -26,7 +28,9 @@ const midnightAccountSchema = new Schema({
   semester: {type: Schema.Types.ObjectId, ref: "Semester"},
   zebe: {type: String, ref: "Zebe"},
   balance: Number,
-  requirement: Number
+  requirement: Number,
+  preferredDays: [Number],
+  preferredTasks: [{type: Schema.Types.ObjectId, ref: "MidnightType"}]
 });
 
 midnightAccountSchema.statics.getCurrent = function() {
@@ -76,11 +80,11 @@ const midnightSchema = new Schema({
 });
 
 midnightSchema.statics.getWeek = function(focusDate) {
-  let today = new Date();
+  let today = moment();
   if (focusDate) {
     today = focusDate;
   }
-  let getDay = (idx) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + idx);
+  let getDay = (idx) => moment([today.year(), today.month(), today.date() - today.day() + idx]);
   return MidnightAccount.getCurrent().then(accounts => {
     return this.find({
       date: {$gte: getDay(0), $lte: getDay(7)},
@@ -90,16 +94,16 @@ midnightSchema.statics.getWeek = function(focusDate) {
     return Promise.resolve([0, 1, 2, 3, 4, 5, 6].map((idx) => ({
       date: getDay(idx),
       midnights: midnights.filter((midnight) => (
-        midnight.date.getFullYear() === getDay(idx).getFullYear()
-        && midnight.date.getMonth() === getDay(idx).getMonth()
-        && midnight.date.getDate() === getDay(idx).getDate()
+        midnight.date.getFullYear() === getDay(idx).year()
+        && midnight.date.getMonth() === getDay(idx).month()
+        && midnight.date.getDate() === getDay(idx).date()
       ))
     })));
   })
 };
 
 midnightSchema.statics.getUnreviewed = function() {
-  let today = new Date();
+  let today = moment();
   return MidnightAccount.getCurrent().then(accounts => {
     return this.find( {
       date: { $lte: today },
@@ -111,18 +115,9 @@ midnightSchema.statics.getUnreviewed = function() {
 
 const Midnight = mongoose.model('Midnight', midnightSchema);
 
-const midnightPrefsSchema = new Schema({
-  zebe: { type: String, ref: "Zebe"},
-  semester: {type: Schema.Types.ObjectId, ref: "Semester"},
-  daysPreferred: [String], // Days that this zebe prefers to work, ex: ['Monday', 'Thursday']
-  tasksPreferred: [{type: Schema.Types.ObjectId, ref: "MidnightType"}] // Tasks that this zebe prefers to do, ex: ['Dinings', 'Waitings', 'Commons']
-});
-
-const MidnightPrefs = mongoose.model('MidnightPrefs', midnightPrefsSchema);
 
 module.exports = {
   Midnight,
   MidnightAccount,
-  MidnightType,
-  MidnightPrefs
+  MidnightType
 };

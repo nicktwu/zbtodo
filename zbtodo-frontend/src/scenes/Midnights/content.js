@@ -4,15 +4,17 @@ import {connect} from 'react-redux';
 import {
   Grid, Paper, Divider, Typography, IconButton, TextField,
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
-  withStyles, withWidth
+  withStyles, withWidth, Button
 } from '@material-ui/core';
 import {WithLoader} from '../../components';
 import {
   MidnightDayToolbar, MidnightsTable, TypeForm,
-  MidnightDetail, MidnightForm, AccountForm,
-  MidnightReviewForm
+  MidnightDetail, MidnightForm, AccountForm, MidnightRequirementForm,
+  MidnightReviewForm, PreferenceForm, MidnightGenerateForm
 } from './components';
-import { NoteAddRounded, ExpandMore, EditOutlined, NoSim, Delete, Add, PersonAddDisabledRounded, PersonAddRounded, VerifiedUser } from '@material-ui/icons';
+import {
+  NoteAddRounded, ExpandMore, EditOutlined, NoSim, AssignmentRounded, AssignmentTurnedIn,
+  Delete, Add, PersonAddDisabledRounded, PersonAddRounded, VerifiedUser } from '@material-ui/icons';
 import { Actions } from './services/redux';
 import { GenericTable, SelectTable, AdminWrapper } from "../../components";
 import moment from 'moment';
@@ -60,7 +62,7 @@ class MidnightContent extends Component {
     super(props);
     this.state = {
       loading: false,
-      showing: (new Date()).getDay() % 7,
+      showing: moment().day() % 7,
       editType: false,
       typeIdx: 0,
       midnightDetail: false,
@@ -70,8 +72,9 @@ class MidnightContent extends Component {
       unreviewedIdx: 0,
       editAccount: false,
       accountIdx: 0,
-      currentDate: (new Date()).toISOString().substring(0,10),
-      differentWeek: false
+      currentDate: moment().toISOString().substring(0,10),
+      differentWeek: false,
+      preferenceForm: false
     };
     this.saveSetting = this.saveSetting.bind(this);
     this.authHandle = this.authHandle.bind(this);
@@ -83,14 +86,14 @@ class MidnightContent extends Component {
     let newDate = evt.target.value;
     let lastDate = moment.parseZone(this.state.currentDate);
     let now = moment();
-    let changeWeek = (lastDate.isoWeekYear() !== moment.parseZone(newDate).isoWeekYear()) || (lastDate.isoWeek() !== moment.parseZone(newDate).isoWeek());
+    let changeWeek = (lastDate.weekYear() !== moment.parseZone(newDate).weekYear()) || (lastDate.week() !== moment.parseZone(newDate).week());
     this.setState({loading: true});
     this.authHandle(this.props.changeDay(this.props.token, {date: moment.parseZone(newDate).toISOString()})).then((content) => {
       if (content) {
         this.setState({
           loading:false,
           currentDate: newDate,
-          differentWeek: (now.isoWeekYear() !== moment.parseZone(newDate).isoWeekYear()) || (now.isoWeek() !== moment.parseZone(newDate).isoWeek()),
+          differentWeek: (now.weekYear() !== moment.parseZone(newDate).weekYear()) || (now.week() !== moment.parseZone(newDate).week()),
           showing: changeWeek ? moment.parseZone(newDate).day() : this.state.showing
         });
       }
@@ -177,11 +180,39 @@ class MidnightContent extends Component {
       tooltipTitle: "Delete Zebes' midnight accounts",
       icon: <PersonAddDisabledRounded />
     };
+    const midnightGenerateForm = {
+      content: <MidnightGenerateForm handleGenerate={()=>{
+        this.setState({loading: true});
+        this.authHandle(this.props.generateMidnights(this.props.token)).then(content => {
+          if (content) this.setState({ loading: false })
+        });
+      }}/>,
+      tooltipTitle: "Generate new midnights for the week",
+      icon: <AssignmentRounded />
+    };
+    const midnightReqForm = {
+      content: <MidnightRequirementForm handleSave={(saveVal) => {
+        if (saveVal) {
+          this.setState({loading: true});
+          this.authHandle(this.props.setRequirement(this.props.token, saveVal)).then(content => {
+            if(content) this.setState({loading: false});
+          })
+        }
+      }} />,
+      tooltipTitle: "Set a requirement",
+      icon: <AssignmentTurnedIn />
+    };
     let { classes, width } = this.props;
     let mdUp = width !== "sm" && width !== "xs";
     return (
       <WithLoader loading={this.state.loading}>
-        <AdminWrapper forms={[deleteTypeForm, addTypeForm, deleteAccountForm, addAccountForm, addMidnightForm]} show={admin}>
+        <AdminWrapper forms={[
+          deleteTypeForm,
+          addTypeForm, deleteAccountForm,
+          addAccountForm, addMidnightForm,
+          midnightReqForm,
+          midnightGenerateForm
+        ]} show={admin}>
           <React.Fragment>
             {
               admin && this.props.typeList[this.state.typeIdx]?
@@ -228,6 +259,7 @@ class MidnightContent extends Component {
                              submit={this.saveSetting(this.props.editAccount)}/>
                 : null
             }
+
             <Grid container className={classes.contentContainer} justify={"center"} direction={"column"}>
               <Grid item xs className={classes.centerText}>
                 <TextField value={this.state.currentDate}
@@ -238,7 +270,7 @@ class MidnightContent extends Component {
                 <Paper className={mdUp ? classes.paper : null}>
                   <Grid container direction={mdUp ? "column" : "row"}>
                     <MidnightDayToolbar mobile={!mdUp} tiny={width==="xs"} active={this.state.showing}
-                                        today={(new Date()).getDay() % 7} differentWeek={this.state.differentWeek}
+                                        today={moment().day() % 7} differentWeek={this.state.differentWeek}
                                         midnightInfo={midnights.map((dayMidnights) => {
                                           let resObj = {};
                                           resObj.dayNumber = moment.parseZone(dayMidnights.date).date();
@@ -249,13 +281,29 @@ class MidnightContent extends Component {
                     <Grid item xs={!mdUp} className={mdUp ? classes.gridItem : classes.largePadding}>
                       <Typography variant={"title"}
                                   gutterBottom>{MONTHS[showingDate.month()]} {showingDate.date().toString()}, {showingDate.year().toString()}</Typography>
-                      <MidnightsTable admin={admin} midnights={showingMidnights} userId={this.props.user._id}
+                      <MidnightsTable admin={admin} midnights={showingMidnights.sort((midnightA, midnightB) => {
+                        if (midnightA.task.name > midnightB.task.name) return 1;
+                        if (midnightB.task.name > midnightA.task.name) return -1;
+                        return 0
+                      })} userId={this.props.user._id}
                                       handleAward={(idx) => (() => this.setState({midnightAward: true, midnightIdx: idx}))}
                                       handleClick={(idx) => (() => this.setState({midnightDetail: true, midnightIdx: idx}))}/>
                     </Grid>
                   </Grid>
                 </Paper>
               </Grid>
+              {
+                (new Set(this.props.accounts.map(acc => acc.zebe._id))).has(this.props.user._id) ?
+                  <React.Fragment>
+                    <Grid item xs className={classes.centerText}>
+                      <Button variant={"outlined"} onClick={()=>this.setState({preferenceForm: true})}>Edit My Midnight Preferences</Button>
+                    </Grid>
+                    <PreferenceForm open={this.state.preferenceForm} tasks={this.props.typeList}
+                                    account={this.props.accounts.filter(acc => acc.zebe._id === this.props.user._id)[0]}
+                                    close={()=>this.setState({preferenceForm: false})}  submit={this.saveSetting(this.props.updatePreferences)}/>
+                  </React.Fragment> : null
+              }
+
               <Grid item className={classes.gridItem} xs>
                 <ExpansionPanel>
                   <ExpansionPanelSummary expandIcon={<ExpandMore/>}>
@@ -275,13 +323,15 @@ class MidnightContent extends Component {
                     <Typography variant="subheading">Midnight Points</Typography>
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails className={this.props.classes.withOverflow}>
-                    <GenericTable tableContent={admin ? this.props.accounts.map((acc, idx) => ({...acc,
+                    <GenericTable tableContent={(admin ? this.props.accounts.map((acc, idx) => ({...acc,
                       edit: <IconButton onClick={()=>this.setState({editAccount: true, accountIdx: idx})}><EditOutlined /></IconButton>
-                    })) :this.props.accounts }
+                    })) : this.props.accounts).sort((acctA, acctB)=>{
+                      return (acctB.balance || 0) - (acctA.balance || 0)
+                    })}
                                   tableHeaders={admin?["Zebe", "Points","Requirement","Edit"]:["Zebe","Points","Requirement"]}
                                   getFields={(content)=>{
                                     let arr = [
-                                      content.zebe.name,
+                                      content.zebe.name + " (" + content.zebe.kerberos + ")",
                                       content.balance || 0,
                                       content.requirement || 0,
                                     ];
@@ -335,7 +385,10 @@ const mapDispatchToProps = (PREFIX) => ((dispatch) => ({
   addAccounts: (token, userIds) => dispatch(Actions.createAccountAction(PREFIX)(token, {zebes: userIds})),
   editAccount: (token, payload) => dispatch(Actions.createAccountAction(PREFIX)(token, payload, {edit: true})),
   deleteAccounts: (token, ids, weekDate) => dispatch(Actions.createAccountAction(PREFIX)(token, {deleted: ids, weekDate}, {remove: true})),
+  updatePreferences: (token, payload) => dispatch(Actions.createPreferencesAction(PREFIX)(token, payload)),
+  setRequirement: (token, value) => dispatch(Actions.createRequirementAction(PREFIX)(token, value)),
   awardMidnight: (token, payload, weekDate) => dispatch(Actions.createMidnightAward(PREFIX)(token, { ...payload, weekDate})),
+  generateMidnights: (token) => dispatch(Actions.createMidnightGenerator(PREFIX)(token)),
   changeDay: (token, date) => dispatch(Actions.createChangeWeek(PREFIX)(token, date))
 }));
 
@@ -351,9 +404,12 @@ const reduxProps = {
   addMidnight: PropTypes.func.isRequired,
   editMidnight: PropTypes.func.isRequired,
   deleteMidnight: PropTypes.func.isRequired,
+  generateMidnights: PropTypes.func.isRequired,
   addAccounts: PropTypes.func.isRequired,
   editAccount: PropTypes.func.isRequired,
   deleteAccounts: PropTypes.func.isRequired,
+  updatePreferences: PropTypes.func.isRequired,
+  setRequirement: PropTypes.func.isRequired,
   awardMidnight: PropTypes.func.isRequired,
   changeDay: PropTypes.func.isRequired
 };

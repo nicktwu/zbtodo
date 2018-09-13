@@ -5,6 +5,9 @@ import MidnightDetail from './MidnightDetail';
 import MidnightForm from './MidnightForm';
 import AccountForm from './AccountForm';
 import MidnightReviewForm from './MidnightReviewForm';
+import PreferenceForm from './PreferenceForm';
+import MidnightGenerateForm from './MidnightGenerateForm';
+import MidnightRequirementForm from './MidnightRequirementForm';
 
 export {
   MidnightReviewForm,
@@ -13,5 +16,8 @@ export {
   MidnightDetail,
   MidnightDayToolbar,
   MidnightsTable,
-  TypeForm
+  TypeForm,
+  PreferenceForm,
+  MidnightGenerateForm,
+  MidnightRequirementForm
 }

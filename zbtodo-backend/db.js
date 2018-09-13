@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Zebe = require('./models/zebe');
 const Semester = require('./models/semester');
-const { Midnight, MidnightType, MidnightAccount, MidnightPrefs } = require('./models/midnights');
+const { Midnight, MidnightType, MidnightAccount } = require('./models/midnights');
 
 function initialize() {
   if (process.env.HEROKU) {
@@ -22,7 +22,6 @@ function initialize() {
   Midnight.init();
   MidnightType.init();
   MidnightAccount.init();
-  MidnightPrefs.init();
 }
 
 module.exports = {

@@ -73,7 +73,7 @@ app.use(auth.withRefresh);
 // api routes
 const zebes = require('./routes/zebes');
 const homes = require('./routes/home');
-const midnights = require('./routes/midnights');
+const midnights = require('./routes/midnights/index');
 const semesters = require('./routes/semester');
 
 app.use('/api/home', homes);

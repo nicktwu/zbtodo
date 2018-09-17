@@ -118,11 +118,15 @@ midnightSchema.statics.findFutureUserMidnights = function(zebe, exclude) {
   return Semester.getCurrent().then((semester) => {
     return MidnightAccount.findOne({ zebe, semester: semester._id}).exec()
   }).then(account => {
-    return this.find({
-      account: account._id,
-      date: {$gte : today},
-      _id: {$nin: exclude}
-    }).populate("task").exec()
+    if (account) {
+      return this.find({
+        account: account._id,
+        date: {$gte: today},
+        _id: {$nin: exclude}
+      }).populate("task").exec()
+    } else {
+      return Promise.resolve([]);
+    }
   })
 };
 

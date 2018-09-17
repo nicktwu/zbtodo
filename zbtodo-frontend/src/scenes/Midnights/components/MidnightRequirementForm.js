@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  FormControl, Input, InputLabel, FormHelperText
+  FormControl, Input, InputLabel
 } from '@material-ui/core';
 import { Clear } from '@material-ui/icons';
 

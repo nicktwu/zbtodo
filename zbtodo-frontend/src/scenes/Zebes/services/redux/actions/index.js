@@ -1,4 +1,5 @@
 import {SAVE_CURRENT_LIST, SAVE_INACTIVE_LIST, SAVE_POTENTIAL_LIST} from "../names";
+import {ReduxActionCreators} from "../../../../../components";
 
 let BACKEND_BASE = "https://zbtodo-backend.herokuapp.com/api/zebes";
 
@@ -14,164 +15,74 @@ const REACTIVATE = BACKEND_BASE + "/reactivate";
 const DELETE = BACKEND_BASE + "/delete_many";
 const PERMISSIONS = BACKEND_BASE + "/permissions";
 
-export const createGetCurrentZebes = (PREFIX) => ((token) => ((dispatch) => {
-  return fetch(CURRENT_ZEBES, {
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token
+const getSaveHandler = function(PREFIX, dispatch) {
+  return (contents) => {
+    if (contents.zebes) {
+      dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.zebes });
     }
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data retrieval failed.")
+    if (contents.current) {
+      dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.current});
     }
-    return res.json()
-  }).then((contents) => {
-    dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.zebes });
+    if (contents.potential) {
+      dispatch({ type: PREFIX+SAVE_POTENTIAL_LIST, users: contents.potential });
+    }
+    if (contents.inactive) {
+      dispatch({ type: PREFIX+SAVE_INACTIVE_LIST, zebes: contents.inactive});
+    }
     return contents
-  });
-}));
-
-// this function isn't really a redux function, but for sake of organizational uniformity it's here
-// at heart, it's doing my service works
-export const editUserInfo = (token, updateObj) => {
-  return fetch(UPDATE_CURRENT, {
-    method: 'POST',
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(updateObj)
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data update failure")
-    }
-    return res.json()
-  })
+  }
 };
 
-export const editZebePermissions = (PREFIX) => ((token, updateObj) => ((dispatch) => {
-  return fetch(PERMISSIONS, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(updateObj)
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data update failure")
-    }
-    return res.json()
-  }).then(contents => {
-    dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.current});
-    return contents;
-  })
+const getFetchOptions = (token) => ({
+  mode: "cors",
+  headers: {
+    "Authorization": "Bearer " + token
+  }
+});
+
+const getFetchPostOptions = (type) => ((token, ids) => ({
+  method: "POST",
+  mode: "cors",
+  headers: {
+    "Authorization": "Bearer " + token,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ [type]: ids })
 }));
 
 
-export const getAdminInfo = (PREFIX) => ((token) => ((dispatch) => {
-  return fetch(ADMIN, {
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token
-    }
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data retrieval failed.")
-    }
-    return res.json()
-  }).then((contents) => {
-    dispatch({ type: PREFIX+SAVE_POTENTIAL_LIST, users: contents.potential });
-    dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.current});
-    dispatch({ type: PREFIX+SAVE_INACTIVE_LIST, zebes: contents.inactive});
-    return contents
-  });
-}));
+export const createGetCurrentZebes = ReduxActionCreators.fetchAndSaveActionCreator(
+  CURRENT_ZEBES,
+  getFetchOptions,
+  getSaveHandler
+);
 
-export const createValidateZebes = (PREFIX) => ((token, updateIDs) => ((dispatch) => {
-  return fetch(VALIDATE, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ validated: updateIDs })
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data retrieval failed.")
-    }
-    return res.json()
-  }).then(contents => {
-    dispatch({ type: PREFIX+SAVE_POTENTIAL_LIST, users: contents.potential });
-    dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.current});
-    return contents
-  })
-}));
+export const editUserInfo = ReduxActionCreators.postAndUpdateCreator(UPDATE_CURRENT, () => (x => x));
 
-export const createDeactivateZebes = (PREFIX) => ((token, updateIDs) => ((dispatch) => {
-  return fetch(DEACTIVATE, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ deactivated: updateIDs })
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data retrieval failed.")
-    }
-    return res.json()
-  }).then(contents => {
-    dispatch({ type: PREFIX+SAVE_POTENTIAL_LIST, users: contents.potential });
-    dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.current});
-    dispatch({ type: PREFIX+SAVE_INACTIVE_LIST, zebes: contents.inactive});
-    return contents
-  })
-}));
+export const editZebePermissions = ReduxActionCreators.postAndUpdateCreator(PERMISSIONS, getSaveHandler);
 
-export const createReactivateZebes = (PREFIX) => ((token, updateIDs) => ((dispatch) => {
-  return fetch(REACTIVATE, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ reactivated: updateIDs })
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data retrieval failed.")
-    }
-    return res.json()
-  }).then(contents => {
-    dispatch({ type: PREFIX+SAVE_POTENTIAL_LIST, users: contents.potential });
-    dispatch({ type: PREFIX+SAVE_CURRENT_LIST, zebes: contents.current});
-    dispatch({ type: PREFIX+SAVE_INACTIVE_LIST, zebes: contents.inactive});
-    return contents
-  })
-}));
+export const getAdminInfo = ReduxActionCreators.fetchAndSaveActionCreator(ADMIN, getFetchOptions, getSaveHandler);
 
-export const createDeleteUsers = (PREFIX) => ((token, updateIDs) => ((dispatch) => {
-  return fetch(DELETE, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ deleted: updateIDs })
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Data retrieval failed.")
-    }
-    return res.json()
-  }).then(contents => {
-    dispatch({ type: PREFIX+SAVE_POTENTIAL_LIST, users: contents.potential });
-    dispatch({ type: PREFIX+SAVE_INACTIVE_LIST, zebes: contents.inactive});
-    return contents
-  })
-}));
+export const createValidateZebes = ReduxActionCreators.fetchAndSaveActionCreator(
+  VALIDATE,
+  getFetchPostOptions("validated"),
+  getSaveHandler
+);
+
+export const createDeactivateZebes = ReduxActionCreators.fetchAndSaveActionCreator(
+  DEACTIVATE,
+  getFetchPostOptions("deactivated"),
+  getSaveHandler
+);
+
+export const createReactivateZebes = ReduxActionCreators.fetchAndSaveActionCreator(
+  REACTIVATE,
+  getFetchPostOptions("reactivated"),
+  getSaveHandler
+);
+
+export const createDeleteUsers = ReduxActionCreators.fetchAndSaveActionCreator(
+  DELETE,
+  getFetchPostOptions("deleted"),
+  getSaveHandler
+);

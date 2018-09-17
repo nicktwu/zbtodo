@@ -75,11 +75,12 @@ const zebes = require('./routes/zebes');
 const homes = require('./routes/home');
 const midnights = require('./routes/midnights/index');
 const semesters = require('./routes/semester');
+const trades = require('./routes/trades');
 
 app.use('/api/home', homes);
 app.use('/api/zebes', zebes);
 app.use("/api/midnights", midnights);
 app.use("/api/semester", semesters);
-
+app.use("/api/trades", trades);
 
 module.exports = app;

@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
 import {
   Grid, Paper, Divider, Typography, IconButton, TextField,
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
@@ -15,8 +14,8 @@ import {
 import {
   NoteAddRounded, ExpandMore, EditOutlined, NoSim, AssignmentRounded, AssignmentTurnedIn,
   Delete, Add, PersonAddDisabledRounded, PersonAddRounded, VerifiedUser } from '@material-ui/icons';
-import { Actions } from './services/redux';
-import { GenericTable, SelectTable, AdminWrapper } from "../../components";
+import { Actions, State } from './services/redux';
+import { GenericTable, SelectTable, AdminWrapper, ReduxWrapper } from "../../components";
 import moment from 'moment';
 
 const MONTHS = [
@@ -80,6 +79,16 @@ class MidnightContent extends Component {
     this.authHandle = this.authHandle.bind(this);
     this.removeMidnight = this.removeMidnight.bind(this);
     this.handleDayChange = this.handleDayChange.bind(this);
+    this.formatDelete = this.formatDelete.bind(this);
+    this.formatWithDate = this.formatWithDate.bind(this);
+  }
+
+  formatWithDate(data) {
+    return {...data, weekDate: moment.parseZone(this.state.currentDate).toISOString()}
+  }
+
+  formatDelete(ids) {
+    return this.formatWithDate({deleted: ids})
   }
 
   handleDayChange(evt) {
@@ -104,7 +113,7 @@ class MidnightContent extends Component {
     return () => {
       this.setState({midnightDetail: false, loading: true});
       return this.authHandle(
-        this.props.deleteMidnight(this.props.token, id, moment.parseZone(this.state.currentDate).toISOString())
+        this.props.deleteMidnight(this.props.token, this.formatWithDate({ deleted: [id]}))
       ).then((contents) => {
         if (contents) {
           this.setState({loading: false})
@@ -124,23 +133,26 @@ class MidnightContent extends Component {
     })
   }
 
-  saveSetting(saveFunc) {
+  saveSetting(saveFunc, modifyPayload=(x=>x) ) {
     return (idArray) => {
-      return this.authHandle(saveFunc(this.props.token, idArray, moment.parseZone(this.state.currentDate).toISOString()))
+      return this.authHandle(saveFunc(this.props.token, modifyPayload(idArray)))
     }
   }
 
   componentDidMount() {
     this.setState({loading: true});
-    this.authHandle(this.props.fetchAll(this.props.token, this.props.user.midnight_maker)).then((content) => {
-      if (content) this.setState({loading: false})
-    })
+    this.authHandle(this.props.user.midnight_maker ? this.props.fetchAdmin(this.props.token) : this.props.fetchAll(this.props.token))
+      .then((content) => { if (content) this.setState({loading: false}) })
   }
 
   render() {
     let midnights = this.props.midnights;
     let showingDate = midnights.length ? moment.parseZone(midnights[this.state.showing].date) : moment();
-    let showingMidnights = midnights.length ? midnights[this.state.showing].midnights : [];
+    let showingMidnights = midnights.length ? midnights[this.state.showing].midnights.sort((midnightA, midnightB) => {
+      if (midnightA.task.name > midnightB.task.name) return 1;
+      if (midnightB.task.name > midnightA.task.name) return -1;
+      return 0
+    }) : [];
     let admin = this.props.user.midnight_maker;
     const addTypeForm = {
       content: <TypeForm submit={this.saveSetting(this.props.addType)}/>,
@@ -149,7 +161,7 @@ class MidnightContent extends Component {
     };
     const deleteTypeForm = {
       content: <SelectTable  contentList={this.props.typeList}
-                             handleAction={this.saveSetting(this.props.deleteTypes)}
+                             handleAction={this.saveSetting(this.props.deleteTypes, this.formatDelete)}
                              fieldHeaders={["Name", "Value", "Description"]} icon={<Delete />}
                              fieldNames={["name","value","description"]} red
                              title={"Delete Midnight Type"} tooltipTitle={"Delete these midnight types and associated midnights"}/>,
@@ -157,7 +169,7 @@ class MidnightContent extends Component {
       icon: <NoSim />
     };
     const addMidnightForm = {
-      content: <MidnightForm submit={this.saveSetting(this.props.addMidnight)}
+      content: <MidnightForm submit={this.saveSetting(this.props.addMidnight, this.formatWithDate)}
                              tasks={this.props.typeList}
                              accounts={this.props.accounts}/>,
       tooltipTitle: "Add a Midnight",
@@ -167,13 +179,13 @@ class MidnightContent extends Component {
       content: <SelectTable contentList={this.props.potentialAccounts} fieldHeaders={["Name", "Kerberos"]}
                             fieldNames={["name","kerberos"]} title={"Open Midnight Account"}
                             tooltipTitle={"Open accounts"} icon={<PersonAddRounded />}
-                            handleAction={this.saveSetting(this.props.addAccounts)}/>,
+                            handleAction={this.saveSetting(this.props.addAccounts, arr=>({zebes:arr}))}/>,
       tooltipTitle: "Open Midnight Account",
       icon: <PersonAddRounded />
     };
     const deleteAccountForm = {
       content: <SelectTable contentList={this.props.accounts}
-                            handleAction={this.saveSetting(this.props.deleteAccounts)}
+                            handleAction={this.saveSetting(this.props.deleteAccounts, this.formatDelete)}
                             fieldHeaders={["Zebe", "Points", "Requirement"]} icon={<Delete />}
                             getField={(account) => [account.zebe.name+"("+account.zebe.kerberos+")",account.balance,account.requirement]}
                             red title={"Delete Midnight Accounts"} tooltipTitle={"Delete these accounts and associated midnights"}/>,
@@ -214,51 +226,38 @@ class MidnightContent extends Component {
           midnightGenerateForm
         ]} show={admin}>
           <React.Fragment>
-            {
-              admin && this.props.typeList[this.state.typeIdx]?
+            {admin && this.props.typeList[this.state.typeIdx]?
                 <TypeForm open={this.state.editType} key={this.props.typeList[this.state.typeIdx]._id}
                           close={()=>this.setState({editType:false})}
                           defaultType={this.props.typeList[this.state.typeIdx]}
-                          submit={(editObj) => this.authHandle(this.props.editType(this.props.token,
-                            {...editObj, _id: this.props.typeList[this.state.typeIdx]._id}
-                          ))} />
-              : null
-            }
-            {
-              showingMidnights[this.state.midnightIdx] ? admin ?
+                          submit={this.saveSetting(this.props.editType)} />
+              : null}
+            {showingMidnights[this.state.midnightIdx] ? admin ?
                 <React.Fragment>
                   <MidnightForm open={this.state.midnightDetail} key={showingMidnights[this.state.midnightIdx]._id + "e"}
                                 defaultMidnight={showingMidnights[this.state.midnightIdx]}
                                 close={() => this.setState({midnightDetail: false})}
                                 remove={this.removeMidnight(showingMidnights[this.state.midnightIdx]._id)}
                                 accounts={this.props.accounts} tasks={this.props.typeList}
-                                submit={this.saveSetting(this.props.editMidnight)}/>
+                                submit={this.saveSetting(this.props.editMidnight, this.formatWithDate)}/>
                   <MidnightReviewForm open={this.state.midnightAward} close={()=>this.setState({midnightAward:false})}
                                       key={showingMidnights[this.state.midnightIdx]._id+"a"}
-                                      submit={this.saveSetting(this.props.awardMidnight)}
+                                      submit={this.saveSetting(this.props.awardMidnight, this.formatWithDate)}
                                       midnight={showingMidnights[this.state.midnightIdx]}/>
                 </React.Fragment> :
                 <MidnightDetail open={this.state.midnightDetail} midnight={showingMidnights[this.state.midnightIdx]}
-                                close={()=>this.setState({midnightDetail: false})} />
-                : null
-            }
-            {
-              admin && this.props.unreviewed[this.state.unreviewedIdx] ?
+                                close={()=>this.setState({midnightDetail: false})} /> : null}
+            {admin && this.props.unreviewed[this.state.unreviewedIdx] ?
                 <MidnightReviewForm open={this.state.awardUnreviewed} submitTriggersClose
                                     key={this.props.unreviewed[this.state.unreviewedIdx]._id + "u"}
                                     close={()=>this.setState({awardUnreviewed:false})}
                                     submit={this.saveSetting(this.props.awardMidnight)}
-                                    midnight={this.props.unreviewed[this.state.unreviewedIdx]}/>
-                : null
-            }
-            {
-              admin && this.props.accounts[this.state.accountIdx] ?
+                                    midnight={this.props.unreviewed[this.state.unreviewedIdx]}/> : null}
+            {admin && this.props.accounts[this.state.accountIdx] ?
                 <AccountForm key={this.props.accounts[this.state.accountIdx]._id}
                              open={this.state.editAccount} close={() => this.setState({editAccount: false})}
                              defaultAccount={this.props.accounts[this.state.accountIdx]}
-                             submit={this.saveSetting(this.props.editAccount)}/>
-                : null
-            }
+                             submit={this.saveSetting(this.props.editAccount)}/> : null}
 
             <Grid container className={classes.contentContainer} justify={"center"} direction={"column"}>
               <Grid item xs className={classes.centerText}>
@@ -281,11 +280,7 @@ class MidnightContent extends Component {
                     <Grid item xs={!mdUp} className={mdUp ? classes.gridItem : classes.largePadding}>
                       <Typography variant={"title"}
                                   gutterBottom>{MONTHS[showingDate.month()]} {showingDate.date().toString()}, {showingDate.year().toString()}</Typography>
-                      <MidnightsTable admin={admin} midnights={showingMidnights.sort((midnightA, midnightB) => {
-                        if (midnightA.task.name > midnightB.task.name) return 1;
-                        if (midnightB.task.name > midnightA.task.name) return -1;
-                        return 0
-                      })} userId={this.props.user._id}
+                      <MidnightsTable admin={admin} midnights={showingMidnights} userId={this.props.user._id}
                                       handleAward={(idx) => (() => this.setState({midnightAward: true, midnightIdx: idx}))}
                                       handleClick={(idx) => (() => this.setState({midnightDetail: true, midnightIdx: idx}))}/>
                     </Grid>
@@ -366,32 +361,6 @@ class MidnightContent extends Component {
   }
 }
 
-const mapStateToProps = (NAME) => ((state)=>({
-  typeList: state[NAME].types,
-  midnights: state[NAME].midnights,
-  accounts: state[NAME].accounts,
-  potentialAccounts: state[NAME].potentialAccounts,
-  unreviewed: state[NAME].unreviewed
-}));
-
-const mapDispatchToProps = (PREFIX) => ((dispatch) => ({
-  addType: (token, typeObj) => dispatch(Actions.createTypeAction(PREFIX)(token, typeObj)),
-  fetchAll: (token, admin) => dispatch(Actions.createFetchMidnightData(PREFIX)(token, admin)),
-  editType: (token, typeObj) => dispatch(Actions.createTypeAction(PREFIX)(token, typeObj, {edit: true})),
-  deleteTypes: (token, typeIds, weekDate) => dispatch(Actions.createTypeAction(PREFIX)(token, {deleted: typeIds, weekDate}, {remove: true})),
-  addMidnight: (token, midnightObj, weekDate) => dispatch(Actions.createMidnightAction(PREFIX)(token, { ...midnightObj, weekDate })),
-  editMidnight: (token, midnightObj, weekDate) => dispatch(Actions.createMidnightAction(PREFIX)(token, {...midnightObj, weekDate}, {edit: true})),
-  deleteMidnight: (token, id, weekDate) => dispatch(Actions.createMidnightAction(PREFIX)(token, {deleted: [id], weekDate}, {remove: true})),
-  addAccounts: (token, userIds) => dispatch(Actions.createAccountAction(PREFIX)(token, {zebes: userIds})),
-  editAccount: (token, payload) => dispatch(Actions.createAccountAction(PREFIX)(token, payload, {edit: true})),
-  deleteAccounts: (token, ids, weekDate) => dispatch(Actions.createAccountAction(PREFIX)(token, {deleted: ids, weekDate}, {remove: true})),
-  updatePreferences: (token, payload) => dispatch(Actions.createPreferencesAction(PREFIX)(token, payload)),
-  setRequirement: (token, value) => dispatch(Actions.createRequirementAction(PREFIX)(token, value)),
-  awardMidnight: (token, payload, weekDate) => dispatch(Actions.createMidnightAward(PREFIX)(token, { ...payload, weekDate})),
-  generateMidnights: (token) => dispatch(Actions.createMidnightGenerator(PREFIX)(token)),
-  changeDay: (token, date) => dispatch(Actions.createChangeWeek(PREFIX)(token, date))
-}));
-
 const reduxProps = {
   typeList: PropTypes.array.isRequired,
   midnights: PropTypes.array.isRequired,
@@ -401,6 +370,7 @@ const reduxProps = {
   addType: PropTypes.func.isRequired,
   editType: PropTypes.func.isRequired,
   fetchAll: PropTypes.func.isRequired,
+  fetchAdmin: PropTypes.func.isRequired,
   addMidnight: PropTypes.func.isRequired,
   editMidnight: PropTypes.func.isRequired,
   deleteMidnight: PropTypes.func.isRequired,
@@ -432,6 +402,4 @@ MidnightContent.propTypes = {
   ...reduxProps
 };
 
-
-export default (PREFIX, NAME) =>
-  connect(mapStateToProps(NAME), mapDispatchToProps(PREFIX))(withWidth()(withStyles(styles)(MidnightContent)))
+export default ReduxWrapper(Actions, State)(withWidth()(withStyles(styles)(MidnightContent)))

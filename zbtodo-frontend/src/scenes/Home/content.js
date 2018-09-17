@@ -2,12 +2,12 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {
   Grid, Card, Divider, CardContent,
-  Typography, withStyles
+  Typography, withStyles,
+  List, ListItem, ListItemIcon, ListItemText
 } from '@material-ui/core';
-import {Person, Input} from '@material-ui/icons';
-import {connect} from 'react-redux';
-import {Actions} from './services/redux';
-import {WithLoader, AdminWrapper} from '../../components';
+import {Person, Input, Notifications} from '@material-ui/icons';
+import {Actions, State} from './services/redux';
+import {WithLoader, AdminWrapper, ReduxWrapper} from '../../components';
 import { AdvanceSemesterForm } from "./components";
 
 const userIconSize = 32;
@@ -95,10 +95,10 @@ class Content extends Component {
                 </Grid>
                 <Grid item className={this.props.classes.gridItemPadded}>
                   <Typography variant="headline">
-                    {this.props.home.user.name}
+                    {this.props.user.name}
                   </Typography>
-                  { this.props.home.semester ? <Typography variant="caption">
-                    {this.props.home.semester.name}
+                  { this.props.semester ? <Typography variant="caption">
+                    {this.props.semester.name}
                   </Typography> : null }
                 </Grid>
               </Grid>
@@ -109,10 +109,24 @@ class Content extends Component {
                   <Typography variant="headline" gutterBottom>
                     Overview
                   </Typography>
-                  <Divider className={this.props.classes.cardDivider}/>
-                  <Typography variant="body1">
-                    {this.props.home.user.zebe ? "Nothing to do!" : "Your account has not been verified. Please contact the tech chair or president."}
-                  </Typography>
+                  <Divider />
+                  {this.props.user.zebe ?
+                    <List>
+                      { this.props.notifications.length ? <React.Fragment>
+                        { this.props.notifications.map(notification => {
+                          return <ListItem key={notification._id}>
+                            <ListItemIcon>
+                              <Notifications />
+                            </ListItemIcon>
+                            <ListItemText inset>{notification.message}</ListItemText>
+                          </ListItem>
+                        })}
+                      </React.Fragment>: <ListItem><ListItemText inset>Nothing to do!</ListItemText></ListItem>  }
+                    </List>:
+                    <Typography variant="body1" gutterBottom>
+                      {"Your account has not been verified. Please contact the tech chair or president."}
+                    </Typography>
+                  }
                 </CardContent>
               </Card>
             </Grid>
@@ -127,7 +141,6 @@ class Content extends Component {
 Content.propTypes = {
   classes: PropTypes.object.isRequired,
   getHome: PropTypes.func.isRequired,
-  home: PropTypes.object.isRequired,
   token: PropTypes.string.isRequired,
   user: PropTypes.object.isRequired,
   refreshToken: PropTypes.func.isRequired,
@@ -136,14 +149,4 @@ Content.propTypes = {
   advanceSemester: PropTypes.func.isRequired
 };
 
-const getMapStateToProps = (NAME) => ((state) => ({
-  home: state[NAME]
-}));
-
-const getMapDispatchToProps = (PREFIX) => ((dispatch) => ({
-  getHome: (token) => dispatch(Actions.createGetHome(PREFIX)(token)),
-  checkReady: (token) => dispatch(Actions.checkNewSemester(PREFIX)(token)),
-  advanceSemester: (token, name) => dispatch(Actions.advanceSemester(PREFIX)(token, name)),
-}));
-
-export default (PREFIX, NAME) => connect(getMapStateToProps(NAME), getMapDispatchToProps(PREFIX))(withStyles(styles)(Content));
+export default ReduxWrapper(Actions, State)(withStyles(styles)(Content));

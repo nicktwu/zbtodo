@@ -103,9 +103,10 @@ router.post('/create', function(req, res, next) {
   }
 });
 
-// /midnight/update/<int:id> PUT
-router.put('/update/:id', function(req, res, next) {
+// /midnight/update PUT
+router.post('/update', function(req, res, next) {
   if (req.body
+    && req.body._id
     && req.body.date // must have date field
     && moment.parseZone(req.body.date) // must have valid date
     && req.body.task // must have some task id
@@ -114,11 +115,18 @@ router.put('/update/:id', function(req, res, next) {
     && req.body.potential > 0 // positive number of potential points
   ) {
     Midnights.Midnight.findByIdAndUpdate(
-      req.params.id,
-      { $set: { date: req.body.date, task: req.body.task, account: req.body.account, potential: req.body.potential } },
+      req.body._id,
+      { $set: {
+        date: req.body.date, task: req.body.task, note: req.body.note,
+          account: req.body.account, potential: req.body.potential } },
       {runValidators: true, new: true, lean: false}
-    ).exec().then(() => {
-      return Midnights.Midnight.getWeek(moment.parseZone(req.body.weekDate))
+    ).exec().then((res) => {
+      if (res) {
+        return Midnights.Midnight.getWeek(moment.parseZone(req.body.weekDate))
+      } else {
+        res.sendStatus(404);
+        throw new Error('not found')
+      }
     }).then(midnights => {
       res.json({midnights: midnights, token: req.refreshed_token})
     }).catch(next);
@@ -142,24 +150,31 @@ router.post('/delete', function(req, res, next) {
   }
 });
 
-// /midnight/award/<int:id> PUT
-router.post('/award/:id', function(req, res, next) {
+// /midnight/award POST
+router.post('/award', function(req, res, next) {
   if (req.body
+    && req.body._id
     && req.body.hasOwnProperty("awarded") // must have date field
   ) {
     let resObj = {token: req.refreshed_token};
-    Midnights.Midnight.findByIdAndUpdate(req.params.id, {
+    Midnights.Midnight.findByIdAndUpdate(req.body._id, {
       $set: { awarded : req.body.awarded, feedback: req.body.feedback || "", reviewed: true }
     }, {runValidators: true, lean: false}).exec().then((oldMidnight) => {
       // updated the midnight, update the respective points
-      if (oldMidnight.reviewed) {
+      if (oldMidnight) {
+        if (oldMidnight.reviewed) {
+          return Midnights.MidnightAccount.findByIdAndUpdate(oldMidnight.account, {
+            $inc: {balance: req.body.awarded - oldMidnight.awarded}
+          }, {runValidators: true, new: true, lean: false})
+        }
         return Midnights.MidnightAccount.findByIdAndUpdate(oldMidnight.account, {
-          $inc: {balance: req.body.awarded - oldMidnight.awarded}
+          $inc: {balance: req.body.awarded}
         }, {runValidators: true, new: true, lean: false})
+      } else {
+        // midnight wasn't found
+        res.sendStatus(404);
+        throw new Error("not found")
       }
-      return Midnights.MidnightAccount.findByIdAndUpdate(oldMidnight.account, {
-        $inc: {balance: req.body.awarded}
-      }, {runValidators: true, new: true, lean: false})
     }).then(() => {
       return Midnights.Midnight.getWeek(moment.parseZone(req.body.weekDate))
     }).then(midnights => {

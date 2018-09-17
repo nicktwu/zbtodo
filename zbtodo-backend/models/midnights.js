@@ -113,6 +113,19 @@ midnightSchema.statics.getUnreviewed = function() {
   })
 };
 
+midnightSchema.statics.findFutureUserMidnights = function(zebe, exclude) {
+  let today = moment().startOf("day");
+  return Semester.getCurrent().then((semester) => {
+    return MidnightAccount.findOne({ zebe, semester: semester._id}).exec()
+  }).then(account => {
+    return this.find({
+      account: account._id,
+      date: {$gte : today},
+      _id: {$nin: exclude}
+    }).populate("task").exec()
+  })
+};
+
 const Midnight = mongoose.model('Midnight', midnightSchema);
 
 

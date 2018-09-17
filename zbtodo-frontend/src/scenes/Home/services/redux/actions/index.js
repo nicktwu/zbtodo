@@ -1,4 +1,5 @@
-import {CURRENT_SEMESTER, CURRENT_USER} from "../names";
+import {CURRENT_SEMESTER, CURRENT_USER, NOTIFICATIONS} from "../names";
+import {ReduxActionCreators} from "../../../../../components";
 
 let BACKEND_BASE = "https://zbtodo-backend.herokuapp.com/api/home";
 let SEMESTER_BASE = "https://zbtodo-backend.herokuapp.com/api/semester";
@@ -12,54 +13,29 @@ const GET_HOME = BACKEND_BASE + "/all";
 const CHECK_OK = SEMESTER_BASE + "/ready_to_advance";
 const ADVANCE_SEMESTER = SEMESTER_BASE + "/advance";
 
-export const createGetHome = (PREFIX) => ((token) => ((dispatch) => {
-  return fetch(GET_HOME, {
-    mode: 'cors',
-    headers: {
-      'Authorization': 'Bearer ' + token
-    }
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Failed to reach backend")
-    }
-    return res.json()
-  }).then(contents => {
+const saveHandler = (PREFIX, dispatch) => ((contents) => {
+  if (contents.zebe) {
     dispatch({type: PREFIX + CURRENT_USER, user: contents.zebe});
+  }
+  if (contents.semester) {
     dispatch({type: PREFIX + CURRENT_SEMESTER, semester: contents.semester});
-    return contents
-  })
-}));
+  }
+  if (contents.notifications) {
+    dispatch({type: PREFIX + NOTIFICATIONS, notifications: contents.notifications});
+  }
+  return contents
+});
 
-export const checkNewSemester = () => ((token) => (() => {
-  return fetch(CHECK_OK, {
-    mode: 'cors',
-    headers: {
-      'Authorization': "Bearer " + token
-    }
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Failed to reach backend")
-    }
-    return res.json()
-  })
-}));
+export const createGetHome = ReduxActionCreators.getAndUpdateCreator(GET_HOME, saveHandler);
 
-export const advanceSemester = (PREFIX) => ((token, name) => ((dispatch) => {
-  return fetch(ADVANCE_SEMESTER, {
-    method: "POST",
-    mode: 'cors',
-    headers: {
-      'Authorization': "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name })
-  }).then(res => {
-    if (res.status >= 400 && res.status <= 600) {
-      throw new Error("Failed to reach backend")
-    }
-    return res.json()
-  }).then(contents => {
-    dispatch({type: PREFIX + CURRENT_SEMESTER, semester: contents.semester});
-    return contents;
-  })
-}));
+export const checkNewSemester = ReduxActionCreators.getAndUpdateCreator(CHECK_OK, saveHandler);
+
+export const advanceSemester = ReduxActionCreators.fetchAndSaveActionCreator(ADVANCE_SEMESTER, (token, name) => ({
+  method: "POST",
+  mode: 'cors',
+  headers: {
+    'Authorization': "Bearer " + token,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ name })
+}), saveHandler);

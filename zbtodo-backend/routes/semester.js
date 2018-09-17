@@ -48,8 +48,10 @@ router.post('/advance', adminPermissions, function(req, res, next) {
         newSem.previous = semester._id;
         // migrate information to new semester
       }
+      // create a new semester, and then attempt to switch into it
       return newSem.save()
     }).then(newSemester => {
+      // this operation is atomic, so we're safe
       return Semester.changeCurrent(newSemester._id)
     }).then(() => {
       return Semester.getCurrent()

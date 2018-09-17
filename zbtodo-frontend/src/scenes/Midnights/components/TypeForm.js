@@ -38,6 +38,9 @@ class TypeForm extends Component {
       description: this.description.current.value,
       defaultDays: this.defaultDays.map((ref) => (ref.current.value))
     };
+    if (this.props.defaultType) {
+      typeObj._id = this.props.defaultType._id;
+    }
     if (!(typeObj.value > 0)) {
       this.setState({numberError: true})
     } else {

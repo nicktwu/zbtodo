@@ -13,4 +13,4 @@ const getZebes = (PREFIX) => ((state = {currentZebes: [], potentialZebes: [], in
   }
 });
 
-export { getZebes }
+export default getZebes

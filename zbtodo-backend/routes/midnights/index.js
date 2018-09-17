@@ -11,6 +11,9 @@ router.use("/midnight", midnightsRoutes);
 router.use("/types", typesRoutes);
 router.use('/accounts', accountRoutes);
 
+// WE MAKE A CRITICAL ASSUMPTION THAT THE MIDNIGHTMAKER NEVER TRIGGERS A RACE BETWEEN
+// DISTINCT OPERATIONS WITH HIMSELF
+// AS A RESULT, OUR MAIN RACE CONDITION IS WITH DELETE OPERATIONS FROM RELATED OBJECTS (Zebes, etc)
 
 /**
  * GET /all/user

@@ -1,4 +1,4 @@
-import {CURRENT_USER, CURRENT_SEMESTER} from "../names";
+import {CURRENT_USER, CURRENT_SEMESTER, NOTIFICATIONS} from "../names";
 
 const getHome = (PREFIX) => ((state = { user: {}, semester: {} }, action) => {
   switch (action.type) {
@@ -6,9 +6,11 @@ const getHome = (PREFIX) => ((state = { user: {}, semester: {} }, action) => {
       return {...state, user: action.user};
     case PREFIX+CURRENT_SEMESTER:
       return {...state, semester: action.semester};
+    case PREFIX + NOTIFICATIONS:
+      return {...state, notifications: action.notifications};
     default:
       return state
   }
 });
 
-export { getHome }
+export default getHome

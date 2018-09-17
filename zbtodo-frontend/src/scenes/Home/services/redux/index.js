@@ -1,4 +1,16 @@
-import * as Actions from "./actions/index";
-import { getHome } from "./reducers/index";
+import reducer from "./reducers/index";
+import {createGetHome, checkNewSemester, advanceSemester} from "./actions";
 
-export {Actions, getHome};
+const Actions = {
+  getHome: createGetHome,
+  checkReady: checkNewSemester,
+  advanceSemester: advanceSemester,
+};
+
+const State = {
+  user: 'user',
+  semester: 'semester',
+  notifications: 'notifications'
+};
+
+export {Actions, State, reducer};

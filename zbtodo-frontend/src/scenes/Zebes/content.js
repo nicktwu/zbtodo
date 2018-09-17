@@ -7,11 +7,10 @@ import {
   withStyles,
   Button, IconButton
 } from '@material-ui/core';
-import { connect } from 'react-redux';
-import { Actions } from './services/redux';
+import { Actions, State } from './services/redux';
 import { EditInfo, EditPermissions } from './components';
 import { EditOutlined, HowToReg, Block, Add, DeleteForever } from '@material-ui/icons';
-import { WithLoader, AdminWrapper, SelectTable } from "../../components";
+import { WithLoader, AdminWrapper, SelectTable, ReduxWrapper } from "../../components";
 
 const styles = theme => {
   return ({
@@ -229,21 +228,4 @@ Content.propTypes = {
   saveEditPermissions: PropTypes.func
 };
 
-const getMapStateToProps = (NAME) => ((state) => ({
-  currentZebes: state[NAME].currentZebes,
-  potentialZebes: state[NAME].potentialZebes,
-  inactiveZebes: state[NAME].inactiveZebes
-}));
-
-const getMapDispatchToProps = (PREFIX) => ((dispatch) => ({
-  getCurrentZebes: (token) => dispatch(Actions.createGetCurrentZebes(PREFIX)(token)),
-  saveUserInfo: Actions.editUserInfo,
-  saveEditPermissions: (token, updateObj) => dispatch(Actions.editZebePermissions(PREFIX)(token, updateObj)),
-  getAdminInfo: (token) => dispatch(Actions.getAdminInfo(PREFIX)(token)),
-  validateZebes: (token, updateIDs) => dispatch(Actions.createValidateZebes(PREFIX)(token, updateIDs)),
-  deactivateZebes: (token, updateIDs) => dispatch(Actions.createDeactivateZebes(PREFIX)(token, updateIDs)),
-  reactivateZebes: (token, updateIDs) => dispatch(Actions.createReactivateZebes(PREFIX)(token, updateIDs)),
-  deleteUsers: (token, updateIDs) => dispatch(Actions.createDeleteUsers(PREFIX)(token, updateIDs))
-}));
-
-export default (PREFIX, NAME) => connect(getMapStateToProps(NAME), getMapDispatchToProps(PREFIX))(withStyles(styles)(Content));
+export default ReduxWrapper(Actions, State)(withStyles(styles)(Content));

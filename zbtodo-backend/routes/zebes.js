@@ -4,6 +4,7 @@ const Zebe = require('../models/zebe');
 const emailValidator = require('email-validator');
 const Semester = require('../models/semester');
 const Midnights = require('../models/midnights');
+const Notifications = require("../models/notifications");
 
 const editPermissions = function(req, res, next) {
   if (req.user.tech_chair || req.user.president || req.user.rush_chair) {
@@ -28,6 +29,7 @@ router.post('/update_current', function(req, res, next) {
     let setObj = {};
     setObj.phone = req.body.phone ? req.body.phone : "";
     setObj.email = req.body.email ? req.body.email : "";
+    // Singular operation updating, this is clearly atomic
     Zebe.findByIdAndUpdate(req.user._id, {$set: setObj}, {runValidators: true, new: true, lean: false}).exec().then((doc) => {
       res.json({ token: req.refreshed_token, user: doc });
     }).catch(next);
@@ -47,6 +49,7 @@ router.get('/admin', editPermissions, function(req, res, next) {
 router.post("/validate", editPermissions, function(req, res, next) {
   if (req.body && req.body.validated && req.body.validated.length > 0) {
     Semester.getCurrent().then((currentSemester) => {
+      // race condition on the semester: worst case, we update the semester to an old semester- not malicious
       return Zebe.update(
         {_id: {$in: req.body.validated}},
         {$set: {zebe: true}, $addToSet: { semesters: currentSemester._id}},
@@ -66,6 +69,7 @@ router.post("/validate", editPermissions, function(req, res, next) {
 router.post("/deactivate", editPermissions, function(req, res, next) {
   if (req.body && req.body.deactivated && req.body.deactivated.length > 0) {
     Semester.getCurrent().then(currentSemester => {
+      // race condition on the semester: worst case, we update the semester to an old semester- not malicious
       return Zebe.update(
         {_id: {$in: req.body.deactivated}},
         {$pullAll: { semesters: [ currentSemester._id ]}},
@@ -85,6 +89,7 @@ router.post("/deactivate", editPermissions, function(req, res, next) {
 router.post("/reactivate", editPermissions, function(req, res, next) {
   if (req.body && req.body.reactivated && req.body.reactivated.length > 0) {
     Semester.getCurrent().then(currentSemester => {
+      // race condition on the semester: worst case, we update the semester to an old semester- not malicious
       return Zebe.update(
         {_id: {$in: req.body.reactivated}},
         {$addToSet: { semesters: currentSemester._id}},
@@ -104,12 +109,17 @@ router.post("/reactivate", editPermissions, function(req, res, next) {
 router.post("/delete_many", editPermissions, function(req, res, next) {
   let responseObj = {token: req.refreshed_token};
   if (req.body && req.body.deleted && req.body.deleted.length > 0) {
+    // no race: midnightaccount and notification's zebe attr should be immutable
     Zebe.deleteMany(
       {_id: {$in: req.body.deleted}},
-    ).exec().then(()=>{
-      return Midnights.Midnight.deleteMany({"account.zebe" : {$in : req.body.deleted}}).exec()
+    ).exec().then(()=> {
+      return Midnights.MidnightAccount.find({zebe: {$in: req.body.deleted}}).exec();
+    }).then((accts) => {
+      return Midnights.Midnight.deleteMany({"account" : {$in : accts.map(acct=>acct._id)}}).exec()
     }).then(() => {
       return Midnights.MidnightAccount.deleteMany({zebe: {$in: req.body.deleted}}).exec()
+    }).then(() => {
+      return Notifications.Notification.deleteMany({zebe: {$in: req.body.deleted}}).exec();
     }).then(() => {
       return Zebe.find({zebe: false}).exec()
     }).then((zebes) => {
@@ -127,6 +137,7 @@ router.post("/delete_many", editPermissions, function(req, res, next) {
 router.post("/permissions", editPermissions, function(req, res, next) {
   let responseObj = {token: req.refreshed_token};
   if (req.body && req.body.id && req.body.permissions) {
+    // atomic, no race
     Zebe.findByIdAndUpdate(
       req.body.id,
       {$set: req.body.permissions},

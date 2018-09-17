@@ -84,18 +84,24 @@ router.post('/create', function(req, res, next){
   }
 });
 
-// /update/<int:id> PUT
-router.put('/update/:id', function(req, res, next) {
+// /update PUT
+router.put('/update', function(req, res, next) {
   if (
     req.body // must have content
+    && req.body._id
     && req.body.zebe // must have zebe
   ) {
     let resObj = {token: req.refreshed_token};
-    Midnights.MidnightAccount.findByIdAndUpdate(req.params.id, {
+    Midnights.MidnightAccount.findByIdAndUpdate(req.body._id, {
       balance: req.body.balance || 0,
       requirement: req.body.requirement || 0
-    }, {runValidators: true, new: true, lean: false}).then(() => {
-      return Midnights.MidnightAccount.getCurrent()
+    }, {runValidators: true, new: true, lean: false}).then((res) => {
+      if (res) {
+        return Midnights.MidnightAccount.getCurrent()
+      } else {
+        res.sendStatus(404);
+        throw new Error("not found");
+      }
     }).then((docs) => {
       resObj.accounts = docs;
       res.json(resObj);

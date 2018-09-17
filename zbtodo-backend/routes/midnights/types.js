@@ -32,6 +32,7 @@ router.post('/create', function(req, res, next) {
       if (currentSem) {
         newType.semester = currentSem._id;
       }
+      // might have the current semester changed out from underneath your feet, but this is tolerable
       return Midnights.MidnightType.create(newType)
     }).then(() => {
       return Midnights.MidnightType.getCurrent()
@@ -45,12 +46,13 @@ router.post('/create', function(req, res, next) {
 });
 
 /**
- * PUT /update/<:id>
+ * PUT /update
  * update the midnight type with the body
  */
-router.put('/update/:id', function(req, res, next) {
+router.post('/update', function(req, res, next) {
   if (
     req.body // must have content
+    && req.body._id
     && req.body.name // must have a name
     && req.body.value // must have a value
     && req.body.value > 0 // must have a positive value
@@ -59,8 +61,20 @@ router.put('/update/:id', function(req, res, next) {
     && req.body.defaultDays.length
   ) {
     let resObj = {token: req.refreshed_token};
-    Midnights.MidnightType.findByIdAndUpdate(req.params.id, req.body).exec().then(() => {
-      return Midnights.MidnightType.getCurrent()
+    Midnights.MidnightType.findByIdAndUpdate(req.body._id, {
+      $set: {
+        name: req.body.name,
+        value: req.body.value,
+        description: req.body.description,
+        defaultDays: req.body.defaultDays
+      }
+    }).exec().then((res) => {
+      if (res) {
+        return Midnights.MidnightType.getCurrent()
+      } else {
+        res.sendStatus(404);
+        throw new Error("not found");
+      }
     }).then(docs => {
       resObj.types = docs;
       res.send(resObj);

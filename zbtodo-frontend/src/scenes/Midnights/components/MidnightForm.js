@@ -45,6 +45,7 @@ class MidnightForm extends Component {
     } else {
       this.setState({saving: true});
       this.props.submit(typeObj).then((valid) => {
+        console.log(valid);
         if (valid) {
           this.setState({saving: false, saved: true});
           if (!this.props.defaultMidnight) {

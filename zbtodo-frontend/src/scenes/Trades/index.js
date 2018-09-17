@@ -1,7 +1,7 @@
 import React from 'react';
-import {HomeRounded} from "@material-ui/icons";
+import {Cached} from "@material-ui/icons";
 import {SceneCreator} from "../../components";
 import content from "./content";
 import {reducer} from "./services/redux";
 
-export default SceneCreator("Home", <HomeRounded/>, content, reducer);
+export default SceneCreator("Trades", <Cached />, content, reducer);

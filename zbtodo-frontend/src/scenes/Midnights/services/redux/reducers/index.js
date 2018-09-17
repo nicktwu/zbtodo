@@ -26,4 +26,4 @@ const getMidnights = (PREFIX) => ((state=initialState, action) => {
   }
 });
 
-export {getMidnights}
+export default getMidnights

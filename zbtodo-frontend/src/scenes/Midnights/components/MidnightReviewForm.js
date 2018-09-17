@@ -28,7 +28,9 @@ class MidnightReviewForm extends Component {
     this.setState({saving: true});
     this.props.submit(typeObj).then((valid) => {
       if (valid && !this.props.submitTriggersClose) {
+        console.log("haha");
         this.setState({saving: false, saved: true});
+        console.log("haha");
         this.timeout = setTimeout(() => this.setState({saved: false}), 2000)
       } else if (this.props.submitTriggersClose) {
         this.props.close();

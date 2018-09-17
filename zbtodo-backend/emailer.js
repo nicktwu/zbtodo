@@ -25,9 +25,16 @@ send = function(to, subject, body) {
   }
 };
 
+const blastResidents = function(subj, body) {
+  return send("zbt-residents@mit.edu", subj, body)
+};
+
+const blastCurrent = function(subj, body) {
+  return send("zbt-current@mit.edu", subj, body)
+};
+
 const notifyMidnightsGenerated = () => {
-  return send(
-    "zbt-residents@mit.edu",
+  return blastResidents(
     "[ZBTodo] Midnights Assigned",
     "Midnights for this week have been assigned. View them in <a href='https://zbt.mit.edu/todo'>ZBTodo</a>.")
 };
@@ -35,5 +42,7 @@ const notifyMidnightsGenerated = () => {
 
 module.exports = {
   send,
-  notifyMidnightsGenerated
+  notifyMidnightsGenerated,
+  blastResidents,
+  blastCurrent
 };

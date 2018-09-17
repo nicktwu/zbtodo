@@ -1,36 +1,31 @@
 import React, { Component } from 'react';
-import {AuthScene, MainScene, HomeScene, MidnightScene, ZebeScene} from "./scenes";
+import {AuthScene, MainScene, HomeScene, MidnightScene, ZebeScene, TradeScene} from "./scenes";
 import getBaseServices from "./services";
 import {combineReducers} from "redux";
 import * as constants from "./constants";
 import {Redirect, Route, Switch} from "react-router-dom";
 
-const Authentication = AuthScene.getComponent(constants.actions.auth, constants.names.auth);
-const withAuth = AuthScene.getWrapper(constants.actions.auth, constants.names.auth);
+const Authentication = constants.getRenderable("auth", AuthScene).component;
+const withAuth = AuthScene.getWrapper(constants.names.auth.action, constants.names.auth.name);
 
-HomeScene.route = constants.paths.home;
-HomeScene.component = withAuth(HomeScene.getComponent(constants.actions.home, constants.names.home));
-MidnightScene.route = constants.paths.midnight;
-MidnightScene.component = withAuth(MidnightScene.getComponent(constants.actions.midnight, constants.names.midnight));
-ZebeScene.route = constants.paths.zebe;
-ZebeScene.component = withAuth(ZebeScene.getComponent(constants.actions.zebe, constants.names.zebe));
-
-const DisplaySceneList = [HomeScene, MidnightScene, ZebeScene];
+const DisplaySceneList = [
+  constants.getRenderable("home", HomeScene, withAuth),
+  constants.getRenderable("midnight", MidnightScene, withAuth),
+  constants.getRenderable("trade", TradeScene, withAuth),
+  constants.getRenderable("zebe", ZebeScene, withAuth),
+];
 
 // setup the main wrapper
 const MainContent = MainScene.getComponent(DisplaySceneList);
 
 // unify all the reducers into one, and set the names appropriately
-const auth = AuthScene.getReducer(constants.actions.auth);
-const home = HomeScene.getReducer(constants.actions.home);
-const zebe = ZebeScene.getReducer(constants.actions.zebe);
-const midnight = MidnightScene.getReducer(constants.actions.midnight);
-const BaseServices = getBaseServices(combineReducers({
-  [constants.names.auth] : auth,
-  [constants.names.home] : home,
-  [constants.names.zebe] : zebe,
-  [constants.names.midnight] : midnight
-}));
+const BaseServices = getBaseServices(combineReducers(constants.joinReducers({
+  auth: AuthScene,
+  home: HomeScene,
+  zebe: ZebeScene,
+  midnight: MidnightScene,
+  trade: TradeScene
+})));
 
 class App extends Component {
   render() {

@@ -1,6 +1,6 @@
 import {CURRENT_USER, CURRENT_SEMESTER, NOTIFICATIONS} from "../names";
 
-const getHome = (PREFIX) => ((state = { user: {}, semester: {} }, action) => {
+const getHome = (PREFIX) => ((state = { user: {}, semester: {}, notifications: [] }, action) => {
   switch (action.type) {
     case PREFIX+CURRENT_USER:
       return {...state, user: action.user};

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { TableToolbar } from "../../../components";
 import { Dialog, Table, TableBody, TableRow, TableCell, withStyles } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import Clear from '@material-ui/icons/Clear';
 
 const styles = (theme) => ({
   padded: {

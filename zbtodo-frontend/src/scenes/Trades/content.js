@@ -3,7 +3,7 @@ import {Actions, State} from './services/redux';
 import PropTypes from 'prop-types';
 import { Grid, IconButton, Button, Card, CardHeader, CardContent, CardActions, Tooltip, withStyles } from '@material-ui/core';
 import { GenericTable, ReduxWrapper } from "../../components";
-import {MoveToInbox} from '@material-ui/icons';
+import MoveToInbox from '@material-ui/icons/MoveToInbox';
 import {MidnightTradeForm, PostMidnightTrade} from './components';
 
 const styles = (theme) => ({

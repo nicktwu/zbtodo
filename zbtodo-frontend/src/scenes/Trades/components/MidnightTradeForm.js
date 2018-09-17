@@ -4,7 +4,7 @@ import {
   FormControl, InputLabel, Input, FormHelperText, Typography, IconButton, Button, Tooltip
 } from '@material-ui/core';
 import { DialogForm } from "../../../components";
-import {Edit} from '@material-ui/icons';
+import Edit from '@material-ui/icons/Edit';
 
 class MidnightTradeForm extends Component {
   constructor(props) {

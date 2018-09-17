@@ -9,7 +9,11 @@ import {
 } from '@material-ui/core';
 import { Actions, State } from './services/redux';
 import { EditInfo, EditPermissions } from './components';
-import { EditOutlined, HowToReg, Block, Add, DeleteForever } from '@material-ui/icons';
+import EditOutlined from '@material-ui/icons/EditOutlined';
+import HowToReg from '@material-ui/icons/HowToReg';
+import Block from '@material-ui/icons/Block';
+import Add from '@material-ui/icons/Add';
+import DeleteForever from '@material-ui/icons/DeleteForever';
 import { WithLoader, AdminWrapper, SelectTable, ReduxWrapper } from "../../components";
 
 const styles = theme => {

@@ -11,9 +11,17 @@ import {
   MidnightDetail, MidnightForm, AccountForm, MidnightRequirementForm,
   MidnightReviewForm, PreferenceForm, MidnightGenerateForm
 } from './components';
-import {
-  NoteAddRounded, ExpandMore, EditOutlined, NoSim, AssignmentRounded, AssignmentTurnedIn,
-  Delete, Add, PersonAddDisabledRounded, PersonAddRounded, VerifiedUser } from '@material-ui/icons';
+import NoteAddRounded from '@material-ui/icons/NoteAddRounded';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import EditOutlined from '@material-ui/icons/EditOutlined';
+import NoSim from '@material-ui/icons/NoSim';
+import AssignmentRounded from '@material-ui/icons/AssignmentRounded';
+import AssignmentTurnedIn from '@material-ui/icons/AssignmentTurnedIn';
+import Delete from '@material-ui/icons/Delete';
+import Add from '@material-ui/icons/Add';
+import PersonAddDisabledRounded from '@material-ui/icons/PersonAddDisabledRounded';
+import PersonAddRounded from '@material-ui/icons/PersonAddRounded';
+import VerifiedUser from '@material-ui/icons/VerifiedUser';
 import { Actions, State } from './services/redux';
 import { GenericTable, SelectTable, AdminWrapper, ReduxWrapper } from "../../components";
 import moment from 'moment';

@@ -1,5 +1,5 @@
 import React from 'react';
-import {HomeRounded} from "@material-ui/icons";
+import HomeRounded from "@material-ui/icons/HomeRounded";
 import {SceneCreator} from "../../components";
 import content from "./content";
 import {reducer} from "./services/redux";

@@ -4,7 +4,7 @@ import {
 } from '@material-ui/core';
 import {lightGreen} from '@material-ui/core/colors';
 import PropTypes from 'prop-types';
-import {Clear} from '@material-ui/icons';
+import Clear from '@material-ui/icons/Clear';
 
 
 const toolbarStyles = (theme) => ({

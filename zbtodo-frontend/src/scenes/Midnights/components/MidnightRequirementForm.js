@@ -9,7 +9,7 @@ import {
   Button,
   FormControl, Input, InputLabel
 } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import Clear from '@material-ui/icons/Clear';
 
 
 class MidnightRequirementForm extends Component {

@@ -4,7 +4,7 @@ import {
   Dialog, DialogContent, FormControl, Button,
   withStyles
 } from '@material-ui/core';
-import {Clear} from '@material-ui/icons';
+import Clear from '@material-ui/icons/Clear';
 import { green } from '@material-ui/core/colors';
 import TableToolbar from "./TableToolbar";
 

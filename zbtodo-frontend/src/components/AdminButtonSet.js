@@ -1,6 +1,7 @@
 import React from 'react';
 import { SpeedDial, SpeedDialIcon } from '@material-ui/lab';
-import {CreateOutlined, Clear} from '@material-ui/icons';
+import Clear from '@material-ui/icons/Clear';
+import CreateOutlined from '@material-ui/icons/CreateOutlined';
 import { withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 

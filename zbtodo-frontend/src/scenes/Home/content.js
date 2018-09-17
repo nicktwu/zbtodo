@@ -5,7 +5,9 @@ import {
   Typography, withStyles,
   List, ListItem, ListItemIcon, ListItemText
 } from '@material-ui/core';
-import {Person, Input, Notifications} from '@material-ui/icons';
+import Person from '@material-ui/icons/Person';
+import Input from '@material-ui/icons/Input';
+import Notifications from '@material-ui/icons/Notifications';
 import {Actions, State} from './services/redux';
 import {WithLoader, AdminWrapper, ReduxWrapper} from '../../components';
 import { AdvanceSemesterForm } from "./components";

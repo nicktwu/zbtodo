@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { TableToolbar } from "../../../components";
 import { Dialog, DialogContentText, DialogContent, DialogActions, Button } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import Clear from '@material-ui/icons/Clear';
 
 
 const MidnightGenerateForm = ({open, close, handleGenerate}) => (

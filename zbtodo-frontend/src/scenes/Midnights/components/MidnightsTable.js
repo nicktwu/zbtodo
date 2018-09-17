@@ -5,7 +5,8 @@ import {
   Tooltip, IconButton, withStyles
 } from "@material-ui/core";
 import classNames from 'classnames';
-import { CreateOutlined, VerifiedUser } from '@material-ui/icons';
+import CreateOutlined from '@material-ui/icons/CreateOutlined';
+import VerifiedUser from '@material-ui/icons/VerifiedUser';
 import { lightGreen } from '@material-ui/core/colors';
 
 const styles = (theme) => ({

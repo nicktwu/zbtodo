@@ -1,5 +1,5 @@
 import React from 'react';
-import {GroupRounded} from "@material-ui/icons";
+import GroupRounded from "@material-ui/icons/GroupRounded";
 import {SceneCreator} from "../../components";
 import content from "./content";
 import {reducer} from "./services/redux";

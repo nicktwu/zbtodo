@@ -85,7 +85,7 @@ router.post('/create', function(req, res, next){
 });
 
 // /update PUT
-router.put('/update', function(req, res, next) {
+router.post('/update', function(req, res, next) {
   if (
     req.body // must have content
     && req.body._id

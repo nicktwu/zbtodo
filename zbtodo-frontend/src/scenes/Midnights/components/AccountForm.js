@@ -53,7 +53,7 @@ class AccountForm extends Component {
           </FormControl>
           <FormControl fullWidth margin="dense">
             <InputLabel>Points</InputLabel>
-            <Input type={"number"} inputRef={this.balance}
+            <Input type={"number"} inputRef={this.balance} inputProps={{step: "any"}}
                    defaultValue={this.props.defaultAccount.balance}/>
           </FormControl>
           <FormControl fullWidth margin="dense">

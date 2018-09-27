@@ -4,6 +4,7 @@ const FROM_EMAIL = "zbt-no-reply@mit.edu";
 
 const sg = require('@sendgrid/mail');
 if (process.env.HEROKU) {
+  console.log("Setting up the Email API");
   sg.setApiKey(process.env.SENDGRID_API_KEY);
 }
 

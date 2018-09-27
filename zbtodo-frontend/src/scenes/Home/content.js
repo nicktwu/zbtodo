@@ -114,7 +114,7 @@ class Content extends Component {
                   <Divider />
                   {this.props.user.zebe ?
                     <List>
-                      { this.props.notifications.length ? <React.Fragment>
+                      { this.props.notifications && this.props.notifications.length ? <React.Fragment>
                         { this.props.notifications.map(notification => {
                           return <ListItem key={notification._id}>
                             <ListItemIcon>

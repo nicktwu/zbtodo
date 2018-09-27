@@ -57,6 +57,7 @@ router.post("/give_midnight", function(req, res, next) {
       resObj.midnightsToTrade = midnights;
       res.json(resObj);
       if (req.body.email && midnight) {
+        console.log("Sending email blast to residents");
         emailer.send("zbt-residents@mit.edu",
           "[ZBTodo] Take " + WEEKDAYS[moment.parseZone(midnight.date).day()]
           + " " + midnight.task.name + (req.body.pointsOffered ? (" for " + req.body.pointsOffered.toString() + " extra points") : ""),

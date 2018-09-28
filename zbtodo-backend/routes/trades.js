@@ -58,10 +58,12 @@ router.post("/give_midnight", function(req, res, next) {
       res.json(resObj);
       if (req.body.email && midnight) {
         console.log("Sending email blast to residents");
+        let messageSubject = "[ZBTodo] Take " + WEEKDAYS[moment.parseZone(midnight.date).day()]
+          + " " + midnight.task.name + ", " + (req.body.pointsOffered + midnight.potential).toString() + " points";
         emailer.send("zbt-residents@mit.edu",
-          "[ZBTodo] Take " + WEEKDAYS[moment.parseZone(midnight.date).day()]
-          + " " + midnight.task.name + (req.body.pointsOffered ? (" for " + req.body.pointsOffered.toString() + " extra points") : ""),
-          "Go to <a href='https://zbt.mit.edu/todo'>ZBTodo</a> to claim."
+          messageSubject,
+          req.body.pointsOffered.toString() + " points guaranteed, " + midnight.potential.toString()
+          + " points awarded on completion. Go to <a href='https://zbt.mit.edu/todo'>ZBTodo</a> to claim."
         )
       }
     }).catch(next);

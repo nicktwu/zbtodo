@@ -53,7 +53,7 @@ router.post('/generate', function(req, res, next) {
     data.types = types;
     data.taskList = tasks;
     data.taskMap = taskMap;
-    return Midnights.MidnightAccount.getCurrent()
+    return Midnights.MidnightAccount.getAssignable()
   }).then(accounts => {
     let broMap = accounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
     return Promise.resolve(computation.assignMidnights(accounts, data.taskList, (broId, taskId) => {

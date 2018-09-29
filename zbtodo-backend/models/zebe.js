@@ -19,6 +19,7 @@ let zebeSchema = new Schema({
   social_chair: { type: Boolean, default: false },
   tech_chair: { type: Boolean, default: false },
   risk_manager: { type: Boolean, default: false },
+  van_driver: {type: Boolean, default: false},
 });
 
 zebeSchema.statics.getCurrentZebes = function(selector) {
@@ -26,7 +27,7 @@ zebeSchema.statics.getCurrentZebes = function(selector) {
     let queryObj = {zebe: true};
     if (currentSemester) {
       queryObj.semesters = { $all: [ currentSemester._id ] }
-    };
+    }
     return selector ? this.find(queryObj).select(selector).exec() : this.find(queryObj).exec();
   })
 };

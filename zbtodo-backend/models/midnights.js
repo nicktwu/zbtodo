@@ -103,7 +103,7 @@ midnightSchema.statics.getWeek = function(focusDate) {
   if (focusDate) {
     today = focusDate;
   }
-  let getDay = (idx) => moment([today.year(), today.month(), today.date() - today.day() + idx]);
+  let getDay = (idx) => moment([today.year(), today.month(), today.date()]).add( idx - today.day(), "days");
   return MidnightAccount.getCurrent().then(accounts => {
     return this.find({
       date: {$gte: getDay(0), $lte: getDay(7)},

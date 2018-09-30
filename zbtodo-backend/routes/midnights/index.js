@@ -44,17 +44,22 @@ router.get('/all/admin', function(req, res, next) {
   let resObj = {token: req.refreshed_token};
   Midnights.MidnightType.getCurrent().then(docs => {
     resObj.types = docs;
+    console.log("retrieved types");
     return Midnights.Midnight.getWeek();
   }).then(midnights => {
     resObj.midnights = midnights;
+    console.log("retrieved midnights");
     return Midnights.MidnightAccount.getCurrent();
   }).then(accounts => {
     resObj.accounts = accounts;
+    console.log("retrieved accounts");
     return Midnights.MidnightAccount.getPotential();
   }).then(potentials => {
     resObj.potential = potentials;
+    console.log("retrieved potentials");
     return Midnights.Midnight.getUnreviewed();
   }).then(unreviewed => {
+    console.log("retrieved unreviewed");
     resObj.unreviewed = unreviewed;
     res.json(resObj);
   }).catch(next);

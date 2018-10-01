@@ -49,7 +49,7 @@ midnightAccountSchema.statics.getAssignable = function() {
       return Zebe.find({
         semesters: { $all: [ semester._id ] },
         van_driver: { $ne : true },
-        midnight_maker: { $not: true }
+        midnight_maker: { $ne: true }
       }).exec().then((zebes) => {
         return this.find({
           semester: semester._id,

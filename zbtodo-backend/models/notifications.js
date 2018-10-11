@@ -36,7 +36,7 @@ notificationSchema.statics.getCurrent = function() {
 };
 
 notificationSchema.statics.purgeExpired = function() {
-  return this.deleteMany({ expiry : { $lte : moment().startOf("day") } }).exec()
+  return this.remove({ expiry : { $lte : moment().startOf("day") } }).exec()
 };
 
 const Notification = mongoose.model('Notification', notificationSchema);
@@ -70,7 +70,7 @@ announcement.statics.getTradeAnnouncements = function() {
 };
 
 announcement.statics.purgeExpired = function() {
-  return this.deleteMany({ expiry : { $lte : moment().startOf("day") } }).exec()
+  return this.remove({ expiry : { $lte : moment().startOf("day") } }).exec()
 };
 
 const Announcement = mongoose.model('Announcement', announcement);

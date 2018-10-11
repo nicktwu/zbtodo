@@ -59,7 +59,7 @@ router.post("/give_midnight", function(req, res, next) {
       if (req.body.email && midnight) {
         console.log("Sending email blast to residents");
         let messageSubject = "[ZBTodo] Take " + WEEKDAYS[moment.parseZone(midnight.date).day()]
-          + " " + midnight.task.name + ", " + (req.body.pointsOffered + midnight.potential).toString() + " points";
+          + " " + midnight.task.name + ", " + (Number(req.body.pointsOffered) + midnight.potential).toString() + " points";
         emailer.send("zbt-residents@mit.edu",
           messageSubject,
           req.body.pointsOffered.toString() + " points guaranteed, " + midnight.potential.toString()

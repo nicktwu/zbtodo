@@ -24,7 +24,7 @@ class PreferenceForm extends Component {
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.weekdays = WEEKDAYS.map(()=>React.createRef());
-    this.tasks = WEEKDAYS.map(()=>React.createRef());
+    this.tasks = props.tasks.map(()=>React.createRef());
   }
 
   handleSubmit(event) {

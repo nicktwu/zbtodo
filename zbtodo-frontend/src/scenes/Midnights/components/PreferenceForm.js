@@ -23,6 +23,7 @@ class PreferenceForm extends Component {
       saving: false,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleTasks = this.handleTasks.bind(this);
     this.weekdays = WEEKDAYS.map(()=>React.createRef());
     this.tasks = props.tasks.map(()=>React.createRef());
   }
@@ -53,6 +54,12 @@ class PreferenceForm extends Component {
     })
   }
 
+  handleTasks() {
+    if (this.tasks.length !== this.props.tasks.length) {
+      this.tasks = this.props.tasks.map(() => React.createRef())
+    }
+  }
+
   componentWillUnmount() {
     if (this.timeout) {
       clearTimeout(this.timeout);
@@ -60,6 +67,7 @@ class PreferenceForm extends Component {
   }
 
   render() {
+    this.handleTasks();
     let { open, close, tasks, account } = this.props;
     let daySet = new Set(account.preferredDays);
     let taskSet = new Set(account.preferredTasks);

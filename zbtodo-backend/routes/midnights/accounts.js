@@ -8,7 +8,7 @@ const permissions = require('./permissions');
 
 router.post('/update_prefs', function(req, res, next) {
   if ( req.body &&
-    ((req.body.preferredDays && req.body.preferredDays.length) || (req.body.preferredTasks && req.body.preferredTasks.length))
+    ((req.body.preferredDays) || (req.body.preferredTasks))
   ) {
     let updateObj = {};
     let findObj = {};

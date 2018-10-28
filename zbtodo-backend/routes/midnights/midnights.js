@@ -26,8 +26,8 @@ router.use(permissions);
 
 router.post('/generate', function(req, res, next) {
   let data = {};
-  let today = moment();
-  let getDay = (idx) => moment([today.year(), today.month(), today.date() - today.day() + idx]);
+  let today = moment().startOf("day");
+  let getDay = (idx) => { return today.add(idx - today.day(), "days") };
   Midnights.MidnightType.getCurrent().then(types => {
     let tasks = [];
     let taskMap = {};
@@ -58,6 +58,7 @@ router.post('/generate', function(req, res, next) {
     let broMap = accounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
     return Promise.resolve(computation.assignMidnights(accounts, data.taskList, (broId, taskId) => {
       let midnight = data.taskMap[taskId];
+      console.log(midnight);
       let bro = broMap[broId];
       let prefDays = new Set(bro.preferredDays ? bro.preferredDays : [0,1,2,3,4,5,6]);
       let prefTasks = new Set(bro.preferredTasks ? bro.preferredTasks.map(task=>task.toString()) : data.types.map(type=>type._id.toString()));

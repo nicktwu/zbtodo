@@ -61,7 +61,7 @@ router.post('/generate', function(req, res, next) {
       let bro = broMap[broId];
       let prefDays = new Set(bro.preferredDays ? bro.preferredDays : [0,1,2,3,4,5,6]);
       let prefTasks = new Set(bro.preferredTasks ? bro.preferredTasks.map(task=>task.toString()) : data.types.map(type=>type._id.toString()));
-      return prefDays.has(midnight.date.getDay()) && prefTasks.has(midnight.task.toString());
+      return prefDays.has(midnight.date.day()) && prefTasks.has(midnight.task.toString());
     }))
   }).then(tasks => {
     return Midnights.Midnight.create(tasks)

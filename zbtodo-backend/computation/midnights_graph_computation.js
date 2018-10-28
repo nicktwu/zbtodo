@@ -1,6 +1,6 @@
 let graphs = require('js-graph-algorithms');
 
-const NUM_BUCKETS = 4;
+const NUM_BUCKETS = 5;
 
 const createCapacities = function(numBros, numTasks) {
   let buckets = [];

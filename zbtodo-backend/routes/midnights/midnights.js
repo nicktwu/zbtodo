@@ -55,8 +55,9 @@ router.post('/generate', function(req, res, next) {
     data.taskMap = taskMap;
     return Midnights.MidnightAccount.getAssignable()
   }).then(accounts => {
-    let broMap = accounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
-    return Promise.resolve(computation.assignMidnights(accounts, data.taskList, (broId, taskId) => {
+    assignableAccounts = accounts.filter((person) => person.requirement || 0 - person.balance > 0 )
+    let broMap = assignableAccounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
+    return Promise.resolve(computation.assignMidnights(assignableAccounts, data.taskList, (broId, taskId) => {
       let midnight = data.taskMap[taskId];
       let bro = broMap[broId];
       let prefDays = new Set(bro.preferredDays ? bro.preferredDays : [0,1,2,3,4,5,6]);

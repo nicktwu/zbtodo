@@ -58,10 +58,13 @@ router.post('/advance', adminPermissions, function(req, res, next) {
       // this operation is atomic, so we're safe
       return Semester.changeCurrent(newSemester._id)
     }).then(()=>{
+      console.log("trying to copy types")
       return Midnights.MidnightType.advanceSemester(newSem);
     }).then(() => {
+      console.log('trying to copy accounts')
       return Midnights.MidnightAccount.advanceSemester(newSem);
     }).then(()=>{
+      console.log("clearing old midnights")
       return Midnights.Midnight.advanceSemester();
     }).then(()=>{
       return Notifications.Announcement.advanceSemester();

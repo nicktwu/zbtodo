@@ -1,5 +1,7 @@
 const express = require('express');
 const Semester = require("../models/semester");
+const Notifications = require('../models/notifications');
+const Midnights = require("../models/midnights");
 const router = express.Router();
 
 router.get('/current', function(req, res, next) {
@@ -27,7 +29,7 @@ router.get('/ready_to_advance', adminPermissions, function(req, res, next) {
   resObj.ready = true;
   Semester.getCurrent().then(sem => {
     if (sem) {
-      // do something else to the res obj
+      // one day we will need a sanity check to stop new semesters from just happening, but for now this is okay i guess
     }
     res.json(resObj);
   });
@@ -39,6 +41,7 @@ router.get('/ready_to_advance', adminPermissions, function(req, res, next) {
  */
 router.post('/advance', adminPermissions, function(req, res, next) {
   let resObj = {token: req.refreshed_token};
+  let newSem = null
   if (req.body && req.body.name) {
     // TODO: more advanced advance logic (dealing with midnights, etc)
     Semester.getCurrent().then(semester => {
@@ -51,8 +54,19 @@ router.post('/advance', adminPermissions, function(req, res, next) {
       // create a new semester, and then attempt to switch into it
       return newSem.save()
     }).then(newSemester => {
+      newSem = newSemester;
       // this operation is atomic, so we're safe
       return Semester.changeCurrent(newSemester._id)
+    }).then(()=>{
+      return Midnights.MidnightType.advanceSemester(newSem);
+    }).then(() => {
+      return Midnights.MidnightAccount.advanceSemester(newSem);
+    }).then(()=>{
+      return Midnights.Midnight.advanceSemester();
+    }).then(()=>{
+      return Notifications.Announcement.advanceSemester();
+    }).then(()=>{
+      return Notifications.Notification.advanceSemester();
     }).then(() => {
       return Semester.getCurrent()
     }).then((semester) => {

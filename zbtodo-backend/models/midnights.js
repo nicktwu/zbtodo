@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Aggregate = mongoose.Aggregate;
 const Semester = require("./semester");
 const Zebe = require('./zebe');
 const moment = require('moment');
@@ -20,6 +21,10 @@ midnightTypeSchema.statics.getCurrent = function() {
       return Promise.resolve([])
     }
   })
+};
+
+midnightTypeSchema.statics.advanceSemester = function(newSemester) {
+  return this.updateMany({}, {$set: {semester: newSemester._id}})
 };
 
 const MidnightType = mongoose.model('MidnightType', midnightTypeSchema);
@@ -81,6 +86,19 @@ midnightAccountSchema.statics.getPotential = function () {
     } else {
       return Promise.resolve([])
     }
+  })
+};
+
+midnightAccountSchema.statics.advanceSemester = function(newSemester) {
+  return this.updateMany({}, {semester: newSemester._id}).then(()=>{
+    return this.aggregate([
+      {
+        $project: {semester: 1, zebe: 1, balance: {$subtract: ["balance", "requirement"]}, preferredDays: 1, preferredTasks: 1}
+      },
+      { $out: "midnightaccounts"}
+    ])
+  }).then(()=>{
+    return this.updateMany({balance : {$lt : 0}}, {$set : {balance: 0}})
   })
 };
 
@@ -147,6 +165,10 @@ midnightSchema.statics.findFutureUserMidnights = function(zebe, exclude) {
       return Promise.resolve([]);
     }
   })
+};
+
+midnightSchema.statics.advanceSemester = function() {
+  return this.deleteMany({});
 };
 
 const Midnight = mongoose.model('Midnight', midnightSchema);

@@ -93,7 +93,7 @@ midnightAccountSchema.statics.advanceSemester = function(newSemester) {
   return this.updateMany({}, {semester: newSemester._id}).then(()=>{
     return this.aggregate([
       {
-        $project: {semester: 1, zebe: 1, balance: {$subtract: ["balance", "requirement"]}, preferredDays: 1, preferredTasks: 1}
+        $project: {semester: 1, zebe: 1, balance: {$subtract: ["$balance", "$requirement"]}, preferredDays: 1, preferredTasks: 1}
       },
       { $out: "midnightaccounts"}
     ])

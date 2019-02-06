@@ -57,7 +57,11 @@ router.post('/generate', function(req, res, next) {
     console.log("finished initializing, trying to get midnight accounts");
     return Midnights.MidnightAccount.getAssignable()
   }).then(accounts => {
-    let assignableAccounts = accounts.filter((person) => person.requirement || 0 - person.balance > 0 )
+    console.log(accounts.length);
+    let assignableAccounts = accounts.filter(
+        () => true
+        /*(person) => person.requirement || 0 - person.balance > 0 */
+    );
     let broMap = assignableAccounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
     console.log("all set to begin computation");
     return Promise.resolve(computation.assignMidnights(assignableAccounts, data.taskList, (broId, taskId) => {

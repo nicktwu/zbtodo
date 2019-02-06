@@ -39,6 +39,7 @@ const assignMidnights = function(bros, tasks, getPreferences) {
   let source = 0;
   let sink = numVertices - 1;
 
+  console.log("initializing flow network");
   let g = new graphs.FlowNetwork(numVertices);
 
   let sortedBros = bros.slice().sort((personA, personB) => {
@@ -67,6 +68,8 @@ const assignMidnights = function(bros, tasks, getPreferences) {
     g.addEdge(new graphs.FlowEdge(task, sink, 1))
   }
 
+  console.log("Flow network initialized, beginning FF loop");
+
   let losingPrefs = 0;
   let ff = new graphs.FordFulkerson(g, source, sink);
   let maxFlow = ff.value;
@@ -83,6 +86,8 @@ const assignMidnights = function(bros, tasks, getPreferences) {
     maxFlow += additionalFlow.value;
     losingPrefs += 1;
   }
+
+  console.log("Flow satisfied, retrieve midnights now");
 
   for (let i = 0; i < bros.length; i++) {
     let bro = i + 1;

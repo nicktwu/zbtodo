@@ -28,6 +28,7 @@ router.post('/generate', function(req, res, next) {
   let data = {};
   let today = moment().startOf("day");
   let getDay = (idx) => { return today.add(idx - today.day(), "days") };
+  console.log("About to begin async chain");
   Midnights.MidnightType.getCurrent().then(types => {
     let tasks = [];
     let taskMap = {};
@@ -53,10 +54,12 @@ router.post('/generate', function(req, res, next) {
     data.types = types;
     data.taskList = tasks;
     data.taskMap = taskMap;
+    console.log("finished initializing, trying to get midnight accounts");
     return Midnights.MidnightAccount.getAssignable()
   }).then(accounts => {
-    assignableAccounts = accounts.filter((person) => person.requirement || 0 - person.balance > 0 )
+    let assignableAccounts = accounts.filter((person) => person.requirement || 0 - person.balance > 0 )
     let broMap = assignableAccounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
+    console.log("all set to begin computation");
     return Promise.resolve(computation.assignMidnights(assignableAccounts, data.taskList, (broId, taskId) => {
       let midnight = data.taskMap[taskId];
       let bro = broMap[broId];
@@ -65,8 +68,10 @@ router.post('/generate', function(req, res, next) {
       return prefDays.has(moment(midnight.date).day()) && prefTasks.has(midnight.task.toString());
     }))
   }).then(tasks => {
+    console.log("computation complete, assigning tasks now");
     return Midnights.Midnight.create(tasks)
-  }).then(emailer.notifyMidnightsGenerated).then(()=>{
+  }).then(emailer.notifyMidnightsGenerated).then(()=> {
+    console.log("blasting midnights emails");
     return Midnights.Midnight.getWeek(req.body ? req.body.date : null)
   }).then((midnights)=>{
     res.json({ midnights, token: req.refreshed_token})

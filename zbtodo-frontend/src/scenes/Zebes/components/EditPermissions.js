@@ -15,7 +15,8 @@ const ZEBE_PERMISSIONS = [
   { name: "rush_chair", format: "Rush Chair"},
   { name: "tech_chair", format: "Tech Chair"},
   { name: "social_chair", format: "Social Chair"},
-  { name: "risk_manager", format: "Risk Manager"}
+  { name: "risk_manager", format: "Risk Manager"},
+  { name: "van_driver", format: "Van Driver"}
 ];
 
 

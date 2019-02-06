@@ -45,6 +45,7 @@ const assignMidnights = function(bros, tasks, getPreferences) {
   let sortedBros = bros.slice().sort((personA, personB) => {
     return (personB.requirement || 0 - personB.balance || 0) - (personA.requirement || 0 - personA.balance || 0);
   });
+  console.log(sortedBros.length);
 
   let getCapacity = createCapacities(bros.length, tasks.length);
 

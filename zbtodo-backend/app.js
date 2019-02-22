@@ -6,7 +6,8 @@ const helmet = require('helmet');
 const logger = require('morgan');
 const database = require('./db');
 
-// initialize the database
+// MAIN FILE
+
 database.initialize();
 
 console.log("Starting application...");
@@ -27,7 +28,7 @@ if (process.env.HEROKU) {
   app.use(logger('combined'))
 }
 
-// handle the options requests
+// handle the options requests, which are these ACK requests by the frontend. always return ok to acknowledge you are alive
 app.options("/*", function(req, res) {
   if (process.env.HEROKU) {
     // IN PROD
@@ -42,7 +43,7 @@ app.options("/*", function(req, res) {
   res.sendStatus(200);
 });
 
-// allow origins
+// allow origins, set the response headers so that the frontend knows we expected their request
 app.use(function(req, res, next) {
   if (process.env.HEROKU) {
     // IN PROD
@@ -66,7 +67,7 @@ if (!process.env.HEROKU) {
   app.use('/dev', dev)
 }
 
-// everything here on down needs to be authenticated with a token
+// everything below here on will be authenticated with a token, or rejected
 app.use(auth.requireAuthentication);
 app.use(auth.withRefresh);
 

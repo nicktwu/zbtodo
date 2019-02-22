@@ -9,6 +9,7 @@ function initialize() {
     console.log('Connecting to prod db');
   } else {
     console.log('Connecting to dev db');
+    console.log(process.env.MONGODB_URI);
     mongoose.set("debug", true);
   }
 
@@ -17,8 +18,12 @@ function initialize() {
     .then(() => {
       console.log("Connected to DB!")
   });
+  // these flags were required to get mongoose to work for some goddamn reason
+  // mongoose might fix this eventually, but for now we're doing this
   mongoose.set("useFindAndModify", false);
   mongoose.set('useCreateIndex', true);
+
+  // init all my collections
   Zebe.init();
   Semester.init();
   Midnight.init();

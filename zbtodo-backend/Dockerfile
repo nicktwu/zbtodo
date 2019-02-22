@@ -6,7 +6,7 @@ ADD . /backend
 
 EXPOSE 5000
 
-ENV MONGODB_URI mongodb://db:8080/zbtodo
+ENV MONGODB_URI mongodb://database/zbtodo
 
 
 CMD ["npm","start"]

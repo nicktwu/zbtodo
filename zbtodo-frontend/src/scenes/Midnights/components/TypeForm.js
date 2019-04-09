@@ -81,7 +81,7 @@ class TypeForm extends Component {
           </FormControl>
           <FormControl fullWidth margin="dense" error={this.state.numberError}>
             <InputLabel>Default Point Value</InputLabel>
-            <Input inputRef={this.pointValue} type="number"
+            <Input inputRef={this.pointValue} type="number" inputProps={{step: 0.1}}
                    defaultValue={this.props.defaultType ? this.props.defaultType.value : 0} required/>
             <FormHelperText>Must be positive</FormHelperText>
           </FormControl>

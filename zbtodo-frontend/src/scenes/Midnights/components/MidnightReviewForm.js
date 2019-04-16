@@ -54,7 +54,7 @@ class MidnightReviewForm extends Component {
           { this.props.midnight.note ? <Typography gutterBottom variant="body1">Note: { this.props.midnight.note }</Typography>: null }
           <FormControl fullWidth margin="dense">
             <InputLabel>Points Awarded</InputLabel>
-            <Input inputRef={this.points} type="number" required
+            <Input inputRef={this.points} type="number" required inputProps={{step: 0.1}}
                    defaultValue={this.props.midnight.reviewed ? this.props.midnight.awarded : this.props.midnight.potential}/>
             <FormHelperText>Can be negative (for punts)</FormHelperText>
           </FormControl>

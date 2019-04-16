@@ -91,7 +91,7 @@ class MidnightForm extends Component {
           <FormControl fullWidth margin="dense" error={this.state.numberError}>
             <InputLabel>Point Value</InputLabel>
             <Input value={this.state.points} onChange={(evt) => this.setState({points: evt.target.value})} type="number"
-                   required/>
+                   required inputProps={{step: 0.1}}/>
             <FormHelperText>Must be positive</FormHelperText>
           </FormControl>
           <FormControl fullWidth margin="dense" required>

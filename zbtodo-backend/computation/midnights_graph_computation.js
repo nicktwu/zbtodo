@@ -77,7 +77,7 @@ const assignMidnights = function(bros, tasks, getPreferences) {
   while (maxFlow < tasks.length) {
     // bro is gonna lose all his prefs
     let bro = losingPrefs + 1;
-    console.log(losingPrefs);
+    console.log(sortedBros[losingPrefs].zebe.kerberos);
     for (let j = 0; j < tasks.length; j++) {
       let task = j + bros.length + 1;
       if (!getPreferences(sortedBros[losingPrefs]._id.toString(), tasks[j]._id.toString())) {

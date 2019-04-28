@@ -37,7 +37,7 @@ class MidnightRequirementForm extends Component {
         <DialogActions>
           <Button color="primary" onClick={() => {
             close();
-            handleSave(this.requirement.current.value);
+            handleSave({requirement: this.requirement.current.value});
           }}>Set Requirement</Button>
         </DialogActions>
       </Dialog>

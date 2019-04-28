@@ -69,7 +69,28 @@ midnightAccountSchema.statics.getAssignable = function() {
     } else {
       return Promise.resolve([])
     }
-  }).then()
+  })
+};
+
+midnightAccountSchema.statics.setReq = function(requirement) {
+  return Semester.getCurrent().then(semester => {
+    if (semester) {
+      return Zebe.find({
+        semesters: semester._id,
+        van_driver: { $ne : true },
+        midnight_maker: { $ne: true }
+      }).exec().then((zebes) => {
+        return this.updateMany({
+          semester: semester._id,
+          zebe: { $in : zebes.map(zebe => zebe._id)}
+        }, {
+          requirement: requirement
+        }).populate('zebe').exec()
+      })
+    } else {
+      return Promise.resolve([])
+    }
+  })
 };
 
 midnightAccountSchema.statics.getPotential = function () {

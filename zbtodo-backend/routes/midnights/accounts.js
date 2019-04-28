@@ -41,10 +41,7 @@ router.use(permissions);
 
 router.post("/set_req", function(req, res, next) {
   if (req.body && req.body.requirement) {
-    Midnights.MidnightAccount.update({requirement : {$exists: false}},
-      {$set : {requirement: req.body.requirement}},
-      {multi: true, runValidators: true}
-    ).exec().then(() => {
+    Midnights.MidnightAccount.setReq(req.body.requirement).then(() => {
       return Midnights.MidnightAccount.getCurrent();
     }).then(accs => {
       res.json({accounts: accs, token: req.refreshed_token})

@@ -43,7 +43,7 @@ const assignMidnights = function(bros, tasks, getPreferences) {
   let g = new graphs.FlowNetwork(numVertices);
 
   let sortedBros = bros.slice().sort((personA, personB) => {
-    return (personB.requirement || 0 - personB.balance || 0) - (personA.requirement || 0 - personA.balance || 0);
+    return (personB.requirement || 100 - personB.balance || 0) - (personA.requirement || 100 - personA.balance || 0);
   });
   console.log(sortedBros.length);
 

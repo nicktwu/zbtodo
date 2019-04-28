@@ -59,7 +59,7 @@ router.post('/generate', function(req, res, next) {
   }).then(accounts => {
     console.log(accounts.length);
     let assignableAccounts = accounts.filter(
-        (person) => person.requirement || 100 - person.balance > 0
+        (person) => (((person.requirement || 100) - person.balance) > 0)
     );
     let broMap = assignableAccounts.reduce((acc, cur) => ({...acc, [cur._id.toString()]:cur }), {});
     console.log("all set to begin computation");

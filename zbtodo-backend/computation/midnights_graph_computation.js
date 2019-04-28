@@ -42,10 +42,12 @@ const assignMidnights = function(bros, tasks, getPreferences) {
   console.log("initializing flow network");
   let g = new graphs.FlowNetwork(numVertices);
 
-  let sortedBros = bros.slice().sort((personA, personB) => {
+  let sortedBros = bros.slice();
+
+  sortedBros.sort((personA, personB) => {
     return (personB.requirement || 100 - personB.balance || 0) - (personA.requirement || 100 - personA.balance || 0);
   });
-  console.log(sortedBros.length);
+  console.log(sortedBros);
 
   let getCapacity = createCapacities(bros.length, tasks.length);
 

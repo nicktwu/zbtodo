@@ -7,7 +7,7 @@
     "@material-ui/icons": "2.0.3",
     "@material-ui/lab": "1.0.0-alpha.11",
     "classnames": "2.2.6",
-    "moment": "2.22.2",
+    "moment": "2.29.4",
     "prop-types": "15.6.2",
     "react": "^16.4.1",
     "react-cookie": "2.2.0",
